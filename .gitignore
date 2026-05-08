@@ -1,0 +1,49 @@
+.DS_Store
+Thumbs.db
+
+# Editor and IDE state
+/.idea
+/.vscode
+/.zed
+/.nova
+.phpactor.json
+_ide_helper.php
+
+# Claude Code state — regenerable via `php artisan boost:install`
+**/.claude/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test caches
+.phpunit.result.cache
+/api/.phpunit.cache
+
+# Dependencies
+**/node_modules/
+**/vendor/
+
+# Next.js build output
+**/.next/
+**/out/
+**/.vercel/
+**/*.tsbuildinfo
+
+# Laravel runtime caches and storage (recreated by Docker build / Laravel at runtime)
+/api/bootstrap/cache/
+/api/storage/
+/api/public/build
+/api/public/hot
+/api/public/storage
+**/*.sqlite*
+
+# Local Composer credentials
+/api/auth.json
+
+# Assignment prompt is local reference material
+/Task Description.pdf
