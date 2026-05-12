@@ -29,9 +29,8 @@ services:
 
   api:
     build: ./api
-    env_file:
-      - path: ./api/.env
-        required: false
+    volumes:
+      - ./api/.env:/var/www/html/.env
     ports:
       - "8000:8000"
     depends_on:
