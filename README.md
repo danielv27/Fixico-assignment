@@ -8,7 +8,7 @@ Laravel API in `api/`, Next.js client in `web/`, wired through Docker Compose. C
 ```bash
 make bootstrap
 ```
-Starts the stack, runs migrations, plants demo data.
+Starts the stack, runs migrations, seeds demo data.
 
 **Day to day:**
 ```bash
