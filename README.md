@@ -1,12 +1,23 @@
 # Fixico Feature Flag Assignment
 
-Laravel admin/API in `api/`, Next.js client in `web/`, all wired through Docker Compose.
+Laravel API in `api/`, Next.js client in `web/`, wired through Docker Compose. Common workflows are driven by `make`.
 
 ## Run Locally
 
+**First time:**
 ```bash
-docker compose up --build
+make bootstrap
 ```
+Starts the stack, runs migrations, plants demo data.
+
+**Day to day:**
+```bash
+make up      # start
+make down    # stop
+make fresh   # wipe volumes and rebuild from scratch
+```
+
+Run `make` (no args) to list all targets.
 
 | Service | URL |
 | --- | --- |
@@ -15,18 +26,12 @@ docker compose up --build
 | Postgres | localhost:5433 |
 | Redis | localhost:6379 |
 
-All dependencies (Composer + npm) are installed at image build time, so the host checkout stays clean. After changing application code, rebuild the affected service:
+All dependencies (Composer + npm) install at image build time, so the host checkout stays clean.
+
+## Common Tasks
 
 ```bash
-docker compose up --build api    # or web
-```
-
-The API container generates an `APP_KEY` at build, runs migrations on boot, then serves Laravel on `:8000`.
-
-## Common Commands
-
-```bash
-docker compose exec api php artisan test --compact
+make test                                  # API test suite
 docker compose exec api vendor/bin/pint --dirty --format agent
 docker compose exec web npm run lint
 docker compose exec web npm run build
@@ -37,6 +42,7 @@ docker compose exec web npm run build
 - `api/` — Laravel API (Pest, Pint, Boost).
 - `web/` — Next.js app router client.
 - `docker-compose.yml` — Postgres, Redis, API, web.
+- `Makefile` — workflow entry points.
 - `AGENTS.md` — shared instructions for coding agents.
 
 ## Assignment Scope
