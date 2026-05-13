@@ -7,14 +7,14 @@ it('lists flags ordered by name', function (): void {
     FeatureFlag::factory()->create(['name' => 'z.flag']);
     FeatureFlag::factory()->create(['name' => 'a.flag']);
 
-    $this->getJson('/admin/flags')
+    $this->getJson('/api/admin/flags')
         ->assertOk()
         ->assertJsonPath('data.0.name', 'a.flag')
         ->assertJsonPath('data.1.name', 'z.flag');
 });
 
 it('creates a flag', function (): void {
-    $this->postJson('/admin/flags', [
+    $this->postJson('/api/admin/flags', [
         'name' => 'reports.bulk_delete',
         'description' => 'Enables bulk deletion.',
         'enabled' => false,
@@ -28,7 +28,7 @@ it('creates a flag', function (): void {
 it('rejects a duplicate flag name', function (): void {
     FeatureFlag::factory()->create(['name' => 'reports.bulk_delete']);
 
-    $this->postJson('/admin/flags', [
+    $this->postJson('/api/admin/flags', [
         'name' => 'reports.bulk_delete',
         'enabled' => true,
     ])->assertUnprocessable()
@@ -36,7 +36,7 @@ it('rejects a duplicate flag name', function (): void {
 });
 
 it('rejects an invalid flag name format', function (): void {
-    $this->postJson('/admin/flags', [
+    $this->postJson('/api/admin/flags', [
         'name' => 'Has Spaces!',
         'enabled' => true,
     ])->assertUnprocessable()
@@ -46,7 +46,7 @@ it('rejects an invalid flag name format', function (): void {
 it('shows a single flag', function (): void {
     $flag = FeatureFlag::factory()->create(['name' => 'demo.banner']);
 
-    $this->getJson("/admin/flags/{$flag->id}")
+    $this->getJson("/api/admin/flags/{$flag->id}")
         ->assertOk()
         ->assertJsonPath('data.name', 'demo.banner');
 });
@@ -54,7 +54,7 @@ it('shows a single flag', function (): void {
 it('updates a flag', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true]);
 
-    $this->patchJson("/admin/flags/{$flag->id}", ['enabled' => false, 'description' => 'Off for now.'])
+    $this->patchJson("/api/admin/flags/{$flag->id}", ['enabled' => false, 'description' => 'Off for now.'])
         ->assertOk()
         ->assertJsonPath('data.enabled', false);
 
@@ -65,7 +65,7 @@ it('busts the flag cache on update', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true]);
     Cache::put('flags:index:v1', [['name' => $flag->name, 'enabled' => true]], 300);
 
-    $this->patchJson("/admin/flags/{$flag->id}", ['enabled' => false]);
+    $this->patchJson("/api/admin/flags/{$flag->id}", ['enabled' => false]);
 
     expect(Cache::get('flags:index:v1'))->toBeNull();
 });
@@ -73,7 +73,7 @@ it('busts the flag cache on update', function (): void {
 it('deletes a flag', function (): void {
     $flag = FeatureFlag::factory()->create();
 
-    $this->deleteJson("/admin/flags/{$flag->id}")->assertNoContent();
+    $this->deleteJson("/api/admin/flags/{$flag->id}")->assertNoContent();
 
     $this->assertDatabaseMissing('feature_flags', ['id' => $flag->id]);
 });
@@ -82,7 +82,7 @@ it('busts the flag cache on delete', function (): void {
     $flag = FeatureFlag::factory()->create();
     Cache::put('flags:index:v1', [['name' => $flag->name, 'enabled' => true]], 300);
 
-    $this->deleteJson("/admin/flags/{$flag->id}");
+    $this->deleteJson("/api/admin/flags/{$flag->id}");
 
     expect(Cache::get('flags:index:v1'))->toBeNull();
 });

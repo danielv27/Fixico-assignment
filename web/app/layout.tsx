@@ -27,9 +27,9 @@ export default async function RootLayout({
               <Link href="/" className="text-zinc-900 hover:text-emerald-600 dark:text-zinc-100">
                 Reports
               </Link>
-              <Link href="/admin/flags" className="text-zinc-500 hover:text-emerald-600 dark:text-zinc-400">
-                Admin · Flags
-              </Link>
+              <a href="http://localhost:8000/admin/flags" className="text-zinc-500 hover:text-emerald-600 dark:text-zinc-400">
+                Admin · Flags ↗
+              </a>
             </div>
           </nav>
           {children}
