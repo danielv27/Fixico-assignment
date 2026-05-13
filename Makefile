@@ -9,13 +9,13 @@
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-up: env ## Start the stack
+up:  ## Start the stack
 	docker compose up -d
 
 down: ## Stop the stack
 	docker compose down
 
-restart: env ## Apply changes (recreate containers if config or env changed)
+restart: ## Apply changes (recreate containers if config or env changed)
 	docker compose up -d
 
 migrate: ## Run pending migrations
