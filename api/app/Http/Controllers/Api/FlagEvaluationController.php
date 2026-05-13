@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 
 class FlagEvaluationController extends Controller
 {
-    public function __invoke(EvaluateFlagsRequest $request, Evaluator $evaluator): JsonResponse
+    public function evaluate(EvaluateFlagsRequest $request, Evaluator $evaluator): JsonResponse
     {
         return response()->json([
             'flags' => $evaluator->evaluateAll($request->context()),
