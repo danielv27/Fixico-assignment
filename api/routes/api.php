@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\FlagController;
 use App\Http\Controllers\Api\DamageReportController;
 use App\Http\Controllers\Api\FlagEvaluationController;
 use Illuminate\Support\Facades\Route;
@@ -7,6 +8,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn () => response()->json(['name' => 'Fixico API', 'status' => 'ok']));
 
 Route::post('/flags/evaluate', [FlagEvaluationController::class, 'evaluate']);
+
+Route::get('/admin/flags', [FlagController::class, 'index']);
+Route::post('/admin/flags', [FlagController::class, 'store']);
+Route::get('/admin/flags/{flag}', [FlagController::class, 'show']);
+Route::patch('/admin/flags/{flag}', [FlagController::class, 'update']);
+Route::delete('/admin/flags/{flag}', [FlagController::class, 'destroy']);
 
 Route::get('/reports', [DamageReportController::class, 'index']);
 Route::post('/reports', [DamageReportController::class, 'store']);
