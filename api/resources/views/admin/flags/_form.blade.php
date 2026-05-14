@@ -154,51 +154,119 @@
                 </div>
             </div>
 
-            {{-- ─ Evaluate simulator ─────────────────────────────────── --}}
-            <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-3.5">
-                <div class="flex items-center gap-2 text-xs font-semibold text-zinc-700">
-                    <svg class="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                    </svg>
-                    Simulate evaluation
-                </div>
-                <p class="mt-0.5 mb-3 text-xs text-zinc-500">
-                    Enter any user ID to see which bucket they land in and whether they'd see this feature.
-                </p>
+            {{-- ─ Rollout simulator ───────────────────────────────────── --}}
+            <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
 
-                <div class="flex gap-2">
-                    <input type="text" x-model="simSubject"
-                           placeholder="e.g. user-123 or an email"
-                           @input="simResult = null"
-                           @keydown.enter.prevent="simulate()"
-                           class="flex-1 rounded-md border border-zinc-300 px-2.5 py-1.5 text-xs placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                    <button type="button" @click="simulate()"
-                            :disabled="!simSubject.trim() || !getSlug()"
-                            class="rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-40 transition-colors">
-                        Check
+                {{-- Header --}}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-xs font-semibold text-zinc-700">
+                        <svg class="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Rollout simulator
+                    </div>
+                    <button type="button" @click="generateSamples()"
+                            class="text-xs font-medium text-emerald-600 hover:text-emerald-800 transition-colors">
+                        + Generate sample users
                     </button>
                 </div>
+                <p class="mt-0.5 mb-3 text-xs text-zinc-500">
+                    Add user IDs below — press <kbd class="rounded border border-zinc-300 bg-white px-1 py-0.5 font-mono text-[10px]">Enter</kbd>
+                    or comma to add each one. The grid shows all 100 buckets; the highlighted ones are in this rollout.
+                </p>
 
-                <div x-show="simResult !== null" x-cloak class="mt-3">
-                    <div class="flex items-center gap-2 rounded-md px-3 py-2"
-                         :class="simResult ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700'">
-                        <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path x-show="simResult" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            <path x-show="!simResult" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        <span class="text-xs font-medium" x-text="simResult
-                            ? `In rollout — bucket ${simBucket}, which is &lt; ${value}%`
-                            : `Not in rollout — bucket ${simBucket}, needs &lt; ${value}%`">
+                {{-- Tag input --}}
+                <div class="min-h-[2.5rem] flex flex-wrap gap-1.5 rounded-lg border border-zinc-300 bg-white p-2 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500">
+                    <template x-for="(subject, i) in subjects" :key="i">
+                        <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+                              :class="isInRollout(subject)
+                                  ? 'bg-emerald-50 text-emerald-800 ring-emerald-200'
+                                  : 'bg-zinc-100 text-zinc-600 ring-zinc-200'">
+                            <span x-text="subject"></span>
+                            <span class="text-[10px] opacity-60" x-text="`#${getBucket(subject)}`"></span>
+                            <button type="button" @click="removeSubject(i)"
+                                    class="ml-0.5 opacity-50 hover:opacity-100 leading-none">&times;</button>
                         </span>
-                    </div>
-                    <p class="mt-1.5 text-xs text-zinc-400"
-                       x-text="`Hash: crc32(&quot;${simSubject}:${getSlug()}&quot;) → bucket ${simBucket} / 100`">
-                    </p>
+                    </template>
+                    <input type="text" x-model="tagInput"
+                           placeholder="user-id or email…"
+                           @keydown.enter.prevent="addTag()"
+                           @keydown.comma.prevent="addTag()"
+                           @keydown.backspace="tagInput === '' && subjects.length && removeSubject(subjects.length - 1)"
+                           class="min-w-[140px] flex-1 border-0 bg-transparent p-0.5 text-xs placeholder-zinc-400 focus:outline-none focus:ring-0">
                 </div>
 
-                <p x-show="simResult === null && !getSlug()" x-cloak
-                   class="mt-2 text-xs text-amber-600">
-                    Enter the flag name above before simulating.
+                {{-- Bucket grid --}}
+                <div x-show="getSlug()" class="mt-4">
+                    <div class="mb-2 flex items-center justify-between text-xs text-zinc-500">
+                        <span>100 buckets — <span class="font-medium text-emerald-700" x-text="`${value} in rollout`"></span>, <span x-text="`${100 - value} excluded`"></span></span>
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-400"></span> in rollout</span>
+                            <span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded-sm bg-zinc-200"></span> excluded</span>
+                            <span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded-full bg-violet-500"></span> your users</span>
+                        </div>
+                    </div>
+                    <div class="grid gap-0.5" style="grid-template-columns: repeat(10, 1fr)">
+                        <template x-for="b in 100" :key="b">
+                            <div class="group relative flex h-7 cursor-default items-center justify-center rounded-sm text-[9px] font-medium transition-colors"
+                                 :class="(b-1) < value
+                                     ? (subjectsInBucket(b-1).length ? 'bg-emerald-300 text-emerald-900' : 'bg-emerald-100 text-emerald-600')
+                                     : (subjectsInBucket(b-1).length ? 'bg-violet-100 text-violet-700' : 'bg-zinc-200 text-zinc-400')"
+                                 :title="subjectsInBucket(b-1).length ? subjectsInBucket(b-1).join(', ') + ` (bucket ${b-1})` : `Bucket ${b-1}`">
+                                <span x-text="b-1"></span>
+                                <span x-show="subjectsInBucket(b-1).length > 0"
+                                      class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-violet-500"></span>
+                                {{-- Tooltip for cells with users --}}
+                                <div x-show="subjectsInBucket(b-1).length > 0"
+                                     class="pointer-events-none absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[10px] text-white group-hover:block">
+                                    <template x-for="s in subjectsInBucket(b-1)" :key="s">
+                                        <div x-text="s"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Results table --}}
+                <div x-show="subjects.length > 0 && getSlug()" x-cloak class="mt-4">
+                    <div class="overflow-hidden rounded-lg border border-zinc-200">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-zinc-100 bg-zinc-50">
+                                    <th class="px-3 py-2 text-left font-medium text-zinc-500">User</th>
+                                    <th class="px-3 py-2 text-center font-medium text-zinc-500">Bucket</th>
+                                    <th class="px-3 py-2 text-left font-medium text-zinc-500">Result</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-100 bg-white">
+                                <template x-for="(subject, i) in subjects" :key="i">
+                                    <tr>
+                                        <td class="px-3 py-2 font-mono font-medium text-zinc-800" x-text="subject"></td>
+                                        <td class="px-3 py-2 text-center tabular-nums text-zinc-500" x-text="getBucket(subject)"></td>
+                                        <td class="px-3 py-2">
+                                            <span class="inline-flex items-center gap-1 font-medium"
+                                                  :class="isInRollout(subject) ? 'text-emerald-700' : 'text-zinc-400'">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path x-show="isInRollout(subject)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                    <path x-show="!isInRollout(subject)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                                <span x-text="isInRollout(subject) ? 'In rollout' : 'Excluded'"></span>
+                                                <span class="font-normal opacity-60"
+                                                      x-text="isInRollout(subject) ? `(${getBucket(subject)} < ${value})` : `(${getBucket(subject)} ≥ ${value})`"></span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-2 text-right text-xs text-zinc-400"
+                       x-text="`${subjects.filter(s => isInRollout(s)).length} of ${subjects.length} users in rollout (${value}% threshold)`"></p>
+                </div>
+
+                <p x-show="!getSlug()" x-cloak class="mt-3 text-xs text-amber-600">
+                    Enter the flag name above to enable the simulator.
                 </p>
             </div>
         </div>
@@ -312,16 +380,17 @@ function getBucket(subject, flagName) {
 }
 
 // ---------------------------------------------------------------------------
-// Percentage slider + evaluate simulator
+// Percentage slider + batch rollout simulator
 // ---------------------------------------------------------------------------
 function percentageSlider(initial, serverFlagName) {
     return {
         enabled: initial !== null,
         value: initial ?? 100,
-        simSubject: '',
-        simResult: null,
-        simBucket: null,
         _serverFlagName: serverFlagName,
+
+        // Tag input state
+        tagInput: '',
+        subjects: [],
 
         // On create the name is typed live; on edit it's fixed.
         getSlug() {
@@ -329,12 +398,35 @@ function percentageSlider(initial, serverFlagName) {
             return document.getElementById('name')?.value?.trim() || '';
         },
 
-        simulate() {
-            const slug = this.getSlug();
-            const subject = this.simSubject.trim();
-            if (!slug || !subject) return;
-            this.simBucket = getBucket(subject, slug);
-            this.simResult = this.simBucket < this.value;
+        getBucket(subject) {
+            return getBucket(subject, this.getSlug());
+        },
+
+        isInRollout(subject) {
+            return this.getBucket(subject) < this.value;
+        },
+
+        subjectsInBucket(b) {
+            return this.subjects.filter(s => this.getBucket(s) === b);
+        },
+
+        addTag() {
+            const val = this.tagInput.replace(/,\s*$/, '').trim();
+            if (val && !this.subjects.includes(val)) {
+                this.subjects.push(val);
+            }
+            this.tagInput = '';
+        },
+
+        removeSubject(i) {
+            this.subjects.splice(i, 1);
+        },
+
+        generateSamples() {
+            const samples = Array.from({ length: 20 }, (_, i) => `user-${i + 1}`);
+            samples.forEach(s => {
+                if (!this.subjects.includes(s)) this.subjects.push(s);
+            });
         },
     };
 }
