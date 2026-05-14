@@ -7,6 +7,7 @@ import { evaluateFlags } from "@/lib/flags/server";
 import { getViewerProfile } from "@/lib/viewer/profile";
 import { ViewerSwitcher } from "@/components/ViewerSwitcher";
 import { SubjectInitialiser } from "@/components/SubjectInitialiser";
+import { DemoBanner } from "@/components/DemoBanner";
 
 export const metadata: Metadata = {
   title: "Fixico · Damage Reports",
@@ -26,14 +27,17 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         <SubjectInitialiser />
         <FlagsProvider flags={flags}>
-          {/* Top accent line */}
+
+          {/* Demo banner sits above everything — including the nav */}
+          <DemoBanner />
+
+          {/* Brand accent line */}
           <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
 
-          <header className="sticky top-0.5 z-10 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
+          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
             <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
-              {/* Logo */}
               <div className="flex items-center gap-5">
-                <Link href="/" className="flex items-center gap-2 group">
+                <Link href="/" className="group flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 shadow-sm transition-transform group-hover:scale-105">
                     <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -41,7 +45,6 @@ export default async function RootLayout({
                   </div>
                   <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
-
                 <a
                   href="http://localhost:8000/admin/flags"
                   target="_blank"
@@ -51,8 +54,6 @@ export default async function RootLayout({
                   Admin ↗
                 </a>
               </div>
-
-              {/* Viewer switcher */}
               <ViewerSwitcher profile={profile} />
             </div>
           </header>

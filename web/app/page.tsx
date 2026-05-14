@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { DemoBanner } from "@/components/DemoBanner";
 import { ReportList } from "@/components/ReportList";
 import { BulkActionsToolbar } from "@/components/BulkActionsToolbar";
 import { listReports } from "@/lib/api/reports";
@@ -10,7 +9,6 @@ export default async function Home() {
 
   return (
     <>
-      <DemoBanner />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
         <div className="flex items-center justify-between">
           <div>
