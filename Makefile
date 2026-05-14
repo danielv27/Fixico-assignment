@@ -30,7 +30,7 @@ test: ## Run the API test suite
 	docker compose exec api php artisan test
 
 flush-flags: ## Invalidate the flag cache (use after editing flags directly in the DB)
-	docker compose exec api php artisan cache:forget flags:index:v1
+	docker compose exec api php artisan cache:forget flags:index:v2
 
 logs: ## Tail logs from every service
 	docker compose logs -f

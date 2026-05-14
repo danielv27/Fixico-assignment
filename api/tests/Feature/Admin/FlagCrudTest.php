@@ -63,11 +63,11 @@ it('updates a flag', function (): void {
 
 it('busts the flag cache on update', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true]);
-    Cache::put('flags:index:v1', [['name' => $flag->name, 'enabled' => true]], 300);
+    Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
 
     $this->patchJson("/api/admin/flags/{$flag->id}", ['enabled' => false]);
 
-    expect(Cache::get('flags:index:v1'))->toBeNull();
+    expect(Cache::get('flags:index:v2'))->toBeNull();
 });
 
 it('deletes a flag', function (): void {
@@ -80,9 +80,9 @@ it('deletes a flag', function (): void {
 
 it('busts the flag cache on delete', function (): void {
     $flag = FeatureFlag::factory()->create();
-    Cache::put('flags:index:v1', [['name' => $flag->name, 'enabled' => true]], 300);
+    Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
 
     $this->deleteJson("/api/admin/flags/{$flag->id}");
 
-    expect(Cache::get('flags:index:v1'))->toBeNull();
+    expect(Cache::get('flags:index:v2'))->toBeNull();
 });
