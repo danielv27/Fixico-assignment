@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReportForm } from "@/components/ReportForm";
+import { PhotoAttachments } from "@/components/PhotoAttachments";
 import { updateReportAction } from "@/app/reports/actions";
 import { getReport } from "@/lib/api/reports";
 
@@ -41,7 +42,12 @@ export default async function ReportDetailPage({
           <span className="font-mono">{report.license_plate}</span>
         </p>
       </div>
+
       <ReportForm action={action} initial={report} submitLabel="Save changes" />
+
+      {/* Conditional component #2 — gated by reports.photo_attachments (25 % rollout) */}
+      <hr className="border-zinc-200 dark:border-zinc-800" />
+      <PhotoAttachments reportId={reportId} />
     </main>
   );
 }

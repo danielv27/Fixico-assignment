@@ -14,10 +14,23 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
  * __PHP_Incomplete_Class on the second hit. Arrays round-trip cleanly,
  * and we rehydrate to non-persisted FeatureFlag instances on read so the
  * evaluator works in the model's natural shape.
+ *
+ * Key is versioned — bump when the cached column set changes to avoid stale
+ * entries from a previous schema missing newly required fields.
  */
 final readonly class FlagCache
 {
-    private const KEY = 'flags:index:v1';
+    private const KEY = 'flags:index:v2';
+
+    /** Columns that the Evaluator reads; keeps the cached payload slim. */
+    private const COLUMNS = [
+        'name',
+        'enabled',
+        'attribute_rules',
+        'rollout_percentage',
+        'starts_at',
+        'ends_at',
+    ];
 
     public function __construct(private CacheRepository $cache) {}
 
@@ -30,7 +43,7 @@ final readonly class FlagCache
             self::KEY,
             config('feature_flags.cache_ttl'),
             fn (): array => FeatureFlag::query()
-                ->get(['name', 'enabled'])
+                ->get(self::COLUMNS)
                 ->toArray(),
         );
 

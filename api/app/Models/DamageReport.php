@@ -18,6 +18,7 @@ class DamageReport extends Model
         'license_plate',
         'description',
         'status',
+        'photos',
     ];
 
     protected $attributes = [
@@ -28,6 +29,7 @@ class DamageReport extends Model
     {
         return [
             'status' => ReportStatus::class,
+            'photos' => 'array',
         ];
     }
 }

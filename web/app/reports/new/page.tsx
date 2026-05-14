@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ReportForm } from "@/components/ReportForm";
+import { NewReportBanner } from "@/components/NewReportBanner";
 import { createReportAction } from "@/app/reports/actions";
 
 export default function NewReportPage() {
@@ -16,6 +17,10 @@ export default function NewReportPage() {
           New damage report
         </h1>
       </div>
+
+      {/* Conditional component #3 — gated by report.new_form_layout (NL, 50 %) */}
+      <NewReportBanner />
+
       <ReportForm action={createReportAction} submitLabel="Submit report" />
     </main>
   );
