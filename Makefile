@@ -24,7 +24,11 @@ migrate: ## Run pending migrations
 seed: ## Run database seeders
 	docker compose exec api php artisan db:seed
 
-bootstrap: up migrate seed ## First-time setup: start, generate key, migrate, seed
+bootstrap: up migrate seed ## First-time setup: start, migrate, seed
+
+fresh: ## Wipe volumes and start clean
+	docker compose down -v
+	$(MAKE) bootstrap
 
 test: ## Run the API test suite
 	docker compose exec api php artisan test
