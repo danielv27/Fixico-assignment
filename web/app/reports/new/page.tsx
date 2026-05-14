@@ -1,11 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ReportForm } from "@/components/ReportForm";
 import { NewReportBanner } from "@/components/NewReportBanner";
 import { createReportAction } from "@/app/reports/actions";
 
+export const metadata: Metadata = {
+  title: "New Report — Fixico",
+};
+
 export default function NewReportPage() {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
+    <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8">
       <div className="mb-6">
         <Link
           href="/"
@@ -16,15 +21,16 @@ export default function NewReportPage() {
           </svg>
           All reports
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">New damage report</h1>
+        <h1 className="mt-2 text-xl font-bold tracking-tight">Submit damage report</h1>
+        <p className="mt-0.5 text-sm text-zinc-500">Fill in the details of the damage for assessment.</p>
       </div>
 
-      {/* Conditional component #3 — new form layout (country = NL, 50 % rollout) */}
-      <NewReportBanner />
-
-      <div className="mt-5">
-        <ReportForm action={createReportAction} submitLabel="Submit report" />
+      {/* Conditional component #3 — rolling out to NL users (50 %) */}
+      <div className="mb-5">
+        <NewReportBanner />
       </div>
+
+      <ReportForm action={createReportAction} submitLabel="Submit report" />
     </main>
   );
 }

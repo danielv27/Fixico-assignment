@@ -26,34 +26,37 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         <SubjectInitialiser />
         <FlagsProvider flags={flags}>
-          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
-            <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-              <nav className="flex items-center gap-1">
-                <Link
-                  href="/"
-                  className="rounded-md px-3 py-1.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-800"
-                >
-                  Fixico
+          {/* Top accent line */}
+          <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+
+          <header className="sticky top-0.5 z-10 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
+            <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
+              {/* Logo */}
+              <div className="flex items-center gap-5">
+                <Link href="/" className="flex items-center gap-2 group">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 shadow-sm transition-transform group-hover:scale-105">
+                    <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
-                <span className="text-zinc-300 dark:text-zinc-700">·</span>
-                <Link
-                  href="/"
-                  className="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
-                >
-                  Reports
-                </Link>
+
                 <a
                   href="http://localhost:8000/admin/flags"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                  className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                 >
-                  Flags ↗
+                  Admin ↗
                 </a>
-              </nav>
+              </div>
+
+              {/* Viewer switcher */}
               <ViewerSwitcher profile={profile} />
             </div>
           </header>
+
           <div className="flex flex-1 flex-col">
             {children}
           </div>

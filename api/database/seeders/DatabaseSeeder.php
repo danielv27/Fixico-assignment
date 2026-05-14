@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'demo.banner'],
             [
-                'description' => 'Slice 1 sanity check — toggles the demo banner on the landing page.',
+                'description' => 'Shows a dismissable info banner linking to the flag admin. Demonstrates the basic on/off mechanism.',
                 'enabled' => true,
                 'attribute_rules' => [],
                 'rollout_percentage' => null,
