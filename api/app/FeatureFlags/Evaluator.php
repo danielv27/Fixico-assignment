@@ -5,15 +5,6 @@ namespace App\FeatureFlags;
 use App\Models\FeatureFlag;
 use Illuminate\Support\Carbon;
 
-/**
- * Decides whether a feature flag is on for a given EvaluationContext.
- *
- * Evaluation order — a feature flag is ON only if ALL steps pass:
- *   1. Master switch (enabled)
- *   2. Schedule window (starts_at / ends_at)
- *   3. Attribute rules (AND-ed clauses; empty list → all subjects eligible)
- *   4. Rollout percentage (sticky per subject hash; null → 100 %)
- */
 final readonly class Evaluator
 {
     public function __construct(private FlagCache $cache) {}
@@ -55,10 +46,6 @@ final readonly class Evaluator
         return $decisions;
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
-
     private function withinSchedule(FeatureFlag $flag): bool
     {
         $now = Carbon::now();
@@ -90,18 +77,6 @@ final readonly class Evaluator
         return true;
     }
 
-    /**
-     * Stable per-subject bucket via CRC32 on the subject alone.
-     *
-     * Intentionally does NOT include the flag name in the hash. This means
-     * a subject's bucket (0–99) is fixed across all flags — "user-42 is
-     * always in bucket 17". A 25 % rollout reliably catches the same cohort
-     * of early adopters regardless of which flag you're rolling out, which
-     * is both more intuitive and more useful for product rollouts. The
-     * trade-off (flags are correlated, not independent) is acceptable for
-     * feature toggles; it would matter for rigorous A/B experiments, which
-     * this service is not designed for.
-     */
     private function withinPercentage(FeatureFlag $flag, string $subject): bool
     {
         if ($flag->rollout_percentage === null) {

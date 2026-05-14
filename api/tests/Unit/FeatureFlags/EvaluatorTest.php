@@ -10,10 +10,6 @@ beforeEach(function (): void {
     $this->ctx = new EvaluationContext(subject: 'subject-1');
 });
 
-// ---------------------------------------------------------------------------
-// Step 1: master switch
-// ---------------------------------------------------------------------------
-
 it('returns true when the flag is enabled with no other rules', function (): void {
     $flag = new FeatureFlag(['name' => 'f', 'enabled' => true, 'attribute_rules' => []]);
 
@@ -28,10 +24,6 @@ it('returns false when the flag is disabled regardless of other settings', funct
 
     expect($this->evaluator->evaluate($flag, $this->ctx))->toBeFalse();
 });
-
-// ---------------------------------------------------------------------------
-// Step 2: schedule window
-// ---------------------------------------------------------------------------
 
 it('returns false before starts_at', function (): void {
     Carbon::setTestNow('2026-01-01 10:00:00');
@@ -79,10 +71,6 @@ it('returns true when no schedule window is set', function (): void {
 
     expect($this->evaluator->evaluate($flag, $this->ctx))->toBeTrue();
 });
-
-// ---------------------------------------------------------------------------
-// Step 3: attribute rules
-// ---------------------------------------------------------------------------
 
 it('returns true when attribute_rules is empty', function (): void {
     $flag = new FeatureFlag(['name' => 'f', 'enabled' => true, 'attribute_rules' => []]);
@@ -161,10 +149,6 @@ it('uses strict string comparison — integer 1 does not match string "1"', func
     expect($this->evaluator->evaluate($flag, $ctx))->toBeTrue();
 });
 
-// ---------------------------------------------------------------------------
-// Step 4: rollout percentage
-// ---------------------------------------------------------------------------
-
 it('returns true when rollout_percentage is null (100 %)', function (): void {
     $flag = new FeatureFlag(['name' => 'f', 'enabled' => true, 'attribute_rules' => [], 'rollout_percentage' => null]);
 
@@ -189,7 +173,7 @@ it('returns true for every subject when rollout_percentage is 100', function ():
     }
 });
 
-it('is deterministic — same subject+flag always lands in the same bucket', function (): void {
+it('is deterministic for the same subject', function (): void {
     $flag = new FeatureFlag(['name' => 'reports.feature', 'enabled' => true, 'attribute_rules' => [], 'rollout_percentage' => 50]);
     $ctx = new EvaluationContext(subject: 'user-42');
 
@@ -208,8 +192,6 @@ it('gives the same subject the same bucket across all flags (user-consistent buc
         $results[] = $this->evaluator->evaluate($flag, $ctx);
     }
 
-    // Bucket is based on subject only — a user is either in or out for ALL
-    // flags at the same percentage threshold. All five should be identical.
     expect(count(array_unique($results)))->toBe(1);
 });
 
@@ -229,10 +211,6 @@ it('distributes roughly correctly over many subjects at 50 %', function (): void
     // Expect 40–60 % (within ±10 % of 50 %)
     expect($included)->toBeGreaterThanOrEqual(400)->toBeLessThanOrEqual(600);
 });
-
-// ---------------------------------------------------------------------------
-// evaluateAll
-// ---------------------------------------------------------------------------
 
 it('evaluates every flag in one call and returns the map', function (): void {
     FeatureFlag::factory()->create(['name' => 'flag.a', 'enabled' => true, 'attribute_rules' => []]);

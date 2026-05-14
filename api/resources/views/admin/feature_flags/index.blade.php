@@ -48,12 +48,7 @@
                     @foreach ($flags as $flag)
                         @php
                             $now = now();
-                            // Human-readable label — split on first dot
-                            $nameParts = explode('.', $flag->name, 2);
-                            $namespace = count($nameParts) > 1 ? $nameParts[0] : null;
-                            $label = ucwords(str_replace('_', ' ', end($nameParts)));
 
-                            // Status
                             if (!$flag->enabled) {
                                 $statusLabel = 'Disabled';
                                 $statusClass = 'bg-zinc-100 text-zinc-500 ring-zinc-200/80';
@@ -76,27 +71,18 @@
                                 $dotClass   = 'bg-emerald-500';
                             }
 
-                            // Targeting — cap to 2 visible chips
                             $rules       = $flag->attribute_rules ?? [];
                             $visibleRules = array_slice($rules, 0, 2);
                             $extra       = count($rules) - count($visibleRules);
                         @endphp
                         <tr class="hover:bg-zinc-50/60 transition-colors">
-
-                            {{-- Flag name — human-readable, namespace as small tag --}}
                             <td class="px-5 py-4">
-                                <div class="flex items-baseline gap-2">
-                                    <span class="text-sm font-semibold text-zinc-900">{{ $label }}</span>
-                                    @if ($namespace)
-                                        <span class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-zinc-400">{{ $namespace }}</span>
-                                    @endif
-                                </div>
+                                <span class="font-mono text-sm font-semibold text-zinc-900">{{ $flag->name }}</span>
                                 @if ($flag->description)
                                     <p class="mt-0.5 max-w-xs truncate text-xs text-zinc-400">{{ $flag->description }}</p>
                                 @endif
                             </td>
 
-                            {{-- Targeting — max 2 chips + overflow badge --}}
                             <td class="px-5 py-4">
                                 @if (!empty($rules))
                                     <div class="flex flex-wrap items-center gap-1">
@@ -116,7 +102,6 @@
                                 @endif
                             </td>
 
-                            {{-- Rollout --}}
                             <td class="px-5 py-4">
                                 @if ($flag->rollout_percentage !== null)
                                     <div class="flex items-center gap-2">
@@ -130,7 +115,6 @@
                                 @endif
                             </td>
 
-                            {{-- Status --}}
                             <td class="px-5 py-4">
                                 <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset {{ $statusClass }}">
                                     <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full {{ $dotClass }}"></span>
@@ -138,7 +122,6 @@
                                 </span>
                             </td>
 
-                            {{-- Inline toggle --}}
                             <td class="px-5 py-4 text-center"
                                 x-data="inlineToggle({{ $flag->id }}, {{ $flag->enabled ? 'true' : 'false' }})">
                                 <button type="button"
@@ -152,7 +135,6 @@
                                 </button>
                             </td>
 
-                            {{-- Pencil edit button --}}
                             <td class="px-4 py-4">
                                 <a href="{{ route('admin.feature_flags.edit', $flag) }}"
                                    title="Edit {{ $flag->name }}"

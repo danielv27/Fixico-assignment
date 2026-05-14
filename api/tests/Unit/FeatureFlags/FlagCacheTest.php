@@ -41,7 +41,6 @@ it('reuses the cached payload on subsequent reads', function (): void {
 
     $this->cache->all();
 
-    // Bypass the observer so the cache is not flushed.
     DB::table('feature_flags')->where('name', 'flag.a')->update(['enabled' => false]);
 
     expect($this->cache->all()[0]->enabled)->toBeTrue();
@@ -74,6 +73,5 @@ it('does not flush on query-builder mass update (bypass)', function (): void {
 
     DB::table('feature_flags')->update(['enabled' => false]);
 
-    // Cache is stale — still shows old value until TTL or manual flush
     expect($this->cache->all()[0]->enabled)->toBeTrue();
 });

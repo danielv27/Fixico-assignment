@@ -63,11 +63,11 @@ it('updates a flag', function (): void {
 
 it('busts the flag cache on update', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true]);
-    Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
+    Cache::put('flags:index', [['name' => $flag->name, 'enabled' => true]], 300);
 
     $this->patchJson("/api/admin/feature_flags/{$flag->id}", ['enabled' => false]);
 
-    expect(Cache::get('flags:index:v2'))->toBeNull();
+    expect(Cache::get('flags:index'))->toBeNull();
 });
 
 it('deletes a flag', function (): void {
@@ -80,11 +80,11 @@ it('deletes a flag', function (): void {
 
 it('busts the flag cache on delete', function (): void {
     $flag = FeatureFlag::factory()->create();
-    Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
+    Cache::put('flags:index', [['name' => $flag->name, 'enabled' => true]], 300);
 
     $this->deleteJson("/api/admin/feature_flags/{$flag->id}");
 
-    expect(Cache::get('flags:index:v2'))->toBeNull();
+    expect(Cache::get('flags:index'))->toBeNull();
 });
 
 it('can toggle enabled with a minimal payload (inline list toggle)', function (): void {

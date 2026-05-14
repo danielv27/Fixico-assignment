@@ -47,7 +47,7 @@ A subject is whatever identifies a user — in the demo, a per-browser UUID stor
 
 ## Caching
 
-Single Redis key (`flags:index:v2`) holds every flag. `FlagObserver` busts it on any Eloquent write so admin changes reflect on the next request. TTL (default 300s, override via `FEATURE_FLAGS_CACHE_TTL`) is a fallback for writes that bypass Eloquent — `make flush-flags` is the manual escape hatch.
+Single Redis key (`flags:index`) holds every flag. `FlagObserver` busts it on any Eloquent write so admin changes reflect on the next request. TTL (default 300s, override via `FEATURE_FLAGS_CACHE_TTL`) is a fallback for writes that bypass Eloquent.
 
 The cache stores plain arrays, not Eloquent models — `unserialize()` doesn't trigger the autoloader for unknown classes, which would produce `__PHP_Incomplete_Class` on the second hit. Arrays round-trip cleanly; the cache hydrates non-persisted `FeatureFlag` instances on read.
 

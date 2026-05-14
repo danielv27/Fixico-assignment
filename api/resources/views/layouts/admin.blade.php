@@ -20,7 +20,7 @@
         <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-3.5">
             <div class="flex items-center gap-6">
                 <!-- Logo -->
-                <a href="{{ route('admin.flags.index') }}" class="group flex items-center gap-2.5">
+                <a href="{{ route('admin.feature_flags.index') }}" class="group flex items-center gap-2.5">
                     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 shadow-sm transition-transform group-hover:scale-105">
                         <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -33,9 +33,9 @@
                 </a>
 
                 <nav class="flex items-center gap-1">
-                    <a href="{{ route('admin.flags.index') }}"
+                    <a href="{{ route('admin.feature_flags.index') }}"
                        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-                              {{ request()->routeIs('admin.flags.*') ? 'bg-emerald-50 text-emerald-700' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700' }}">
+                              {{ request()->routeIs('admin.feature_flags.*') ? 'bg-emerald-50 text-emerald-700' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700' }}">
                         Feature flags
                     </a>
                 </nav>

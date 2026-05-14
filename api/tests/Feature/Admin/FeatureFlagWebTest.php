@@ -3,10 +3,6 @@
 use App\Models\FeatureFlag;
 use Illuminate\Support\Facades\Cache;
 
-// ---------------------------------------------------------------------------
-// Index
-// ---------------------------------------------------------------------------
-
 it('renders the flag index page', function (): void {
     FeatureFlag::factory()->create(['name' => 'alpha.flag', 'enabled' => true]);
     FeatureFlag::factory()->disabled()->create(['name' => 'beta.flag']);
@@ -39,20 +35,12 @@ it('shows the correct status badge for each flag state', function (): void {
         ->assertSee('Scheduled');
 });
 
-// ---------------------------------------------------------------------------
-// Create form
-// ---------------------------------------------------------------------------
-
 it('renders the create form', function (): void {
     $this->get(route('admin.feature_flags.create'))
         ->assertOk()
         ->assertSee('New flag')
         ->assertSee('Add rule');
 });
-
-// ---------------------------------------------------------------------------
-// Store — success paths
-// ---------------------------------------------------------------------------
 
 it('creates a flag with only the required fields', function (): void {
     $this->post(route('admin.feature_flags.store'), [
@@ -95,7 +83,7 @@ it('creates a disabled flag', function (): void {
 });
 
 it('flushes the cache after creating a flag', function (): void {
-    Cache::put('flags:index:v2', [['name' => 'old', 'enabled' => true]], 300);
+    Cache::put('flags:index', [['name' => 'old', 'enabled' => true]], 300);
 
     $this->post(route('admin.feature_flags.store'), [
         'name' => 'new.flag',
@@ -103,12 +91,8 @@ it('flushes the cache after creating a flag', function (): void {
         'attribute_rules' => '[]',
     ]);
 
-    expect(Cache::get('flags:index:v2'))->toBeNull();
+    expect(Cache::get('flags:index'))->toBeNull();
 });
-
-// ---------------------------------------------------------------------------
-// Store — validation
-// ---------------------------------------------------------------------------
 
 it('rejects a blank name', function (): void {
     $this->post(route('admin.feature_flags.store'), [
@@ -153,10 +137,6 @@ it('rejects ends_at before starts_at', function (): void {
     ])->assertSessionHasErrors(['ends_at']);
 });
 
-// ---------------------------------------------------------------------------
-// Edit form
-// ---------------------------------------------------------------------------
-
 it('renders the edit form pre-filled with existing values', function (): void {
     $flag = FeatureFlag::factory()->create([
         'name' => 'editable.flag',
@@ -173,10 +153,6 @@ it('renders the edit form pre-filled with existing values', function (): void {
         ->assertSee('Save changes')
         ->assertSee('Delete flag');
 });
-
-// ---------------------------------------------------------------------------
-// Update — success paths
-// ---------------------------------------------------------------------------
 
 it('updates description and enabled state', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true, 'description' => 'Old']);
@@ -220,14 +196,14 @@ it('clears rollout percentage when blank is submitted', function (): void {
 
 it('flushes the cache after updating', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true]);
-    Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
+    Cache::put('flags:index', [['name' => $flag->name, 'enabled' => true]], 300);
 
     $this->patch(route('admin.feature_flags.update', $flag), [
         'enabled' => '0',
         'attribute_rules' => '[]',
     ]);
 
-    expect(Cache::get('flags:index:v2'))->toBeNull();
+    expect(Cache::get('flags:index'))->toBeNull();
 });
 
 it('does not update the flag name', function (): void {
@@ -242,10 +218,6 @@ it('does not update the flag name', function (): void {
     expect($flag->refresh()->name)->toBe('original.name');
 });
 
-// ---------------------------------------------------------------------------
-// Update — the nested-form regression
-// ---------------------------------------------------------------------------
-
 it('PATCH does NOT delete the flag (nested-form regression)', function (): void {
     $flag = FeatureFlag::factory()->create();
 
@@ -256,10 +228,6 @@ it('PATCH does NOT delete the flag (nested-form regression)', function (): void 
 
     $this->assertDatabaseHas('feature_flags', ['id' => $flag->id]);
 });
-
-// ---------------------------------------------------------------------------
-// Destroy
-// ---------------------------------------------------------------------------
 
 it('deletes a flag', function (): void {
     $flag = FeatureFlag::factory()->create();
@@ -272,11 +240,11 @@ it('deletes a flag', function (): void {
 
 it('flushes the cache after deleting', function (): void {
     $flag = FeatureFlag::factory()->create();
-    Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
+    Cache::put('flags:index', [['name' => $flag->name, 'enabled' => true]], 300);
 
     $this->delete(route('admin.feature_flags.destroy', $flag));
 
-    expect(Cache::get('flags:index:v2'))->toBeNull();
+    expect(Cache::get('flags:index'))->toBeNull();
 });
 
 it('returns 404 when deleting a non-existent flag', function (): void {
