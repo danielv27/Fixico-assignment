@@ -30,7 +30,7 @@ export function PhotoAttachments({ reportId }: Props) {
     startTransition(async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/${reportId}/photos`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reports/${reportId}/photos`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json", Accept: "application/json" },

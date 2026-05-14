@@ -8,12 +8,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | The API is served from :8000 while the Next.js client runs on :3001,
-    | so every browser-side request is cross-origin.  All paths are opened
-    | because we removed the default /api prefix — routes live at the root.
+    | so every browser-side API request is cross-origin. Only api/* paths
+    | need CORS — the Blade admin at /admin/* is same-origin (served from
+    | localhost:8000 directly).
     |
     */
 
-    'paths' => ['*'],
+    'paths' => ['api/*'],
 
     'allowed_methods' => ['*'],
 

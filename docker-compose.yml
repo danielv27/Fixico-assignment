@@ -29,6 +29,10 @@ services:
 
   api:
     build: ./api
+    # Bind-mount the host .env so edits take effect without rebuilding.
+    # We don't use `env_file:` here because Laravel's `php artisan serve`
+    # strips most OS env vars from its PHP worker; values must come from
+    # the .env file on disk, not the process environment.
     volumes:
       - ./api/.env:/var/www/html/.env
     ports:

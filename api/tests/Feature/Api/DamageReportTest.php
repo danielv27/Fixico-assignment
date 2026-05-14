@@ -7,7 +7,7 @@ it('lists damage reports newest first', function (): void {
     $older = DamageReport::factory()->create(['created_at' => now()->subDay()]);
     $newer = DamageReport::factory()->create();
 
-    $response = $this->getJson('/reports');
+    $response = $this->getJson('/api/reports');
 
     $response->assertOk()
         ->assertJsonCount(2, 'data')
@@ -23,7 +23,7 @@ it('creates a damage report with sensible defaults', function (): void {
         'description' => 'Front bumper scratched in the supermarket parking lot.',
     ];
 
-    $response = $this->postJson('/reports', $payload);
+    $response = $this->postJson('/api/reports', $payload);
 
     $response->assertCreated()
         ->assertJsonPath('data.vehicle_make', 'Volkswagen')
@@ -33,13 +33,13 @@ it('creates a damage report with sensible defaults', function (): void {
 });
 
 it('validates required fields on create', function (): void {
-    $this->postJson('/reports', [])
+    $this->postJson('/api/reports', [])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['vehicle_make', 'vehicle_model', 'license_plate', 'description']);
 });
 
 it('rejects an unknown status on create', function (): void {
-    $this->postJson('/reports', [
+    $this->postJson('/api/reports', [
         'vehicle_make' => 'BMW',
         'vehicle_model' => 'M3',
         'license_plate' => 'XX-000-XX',
@@ -51,7 +51,7 @@ it('rejects an unknown status on create', function (): void {
 it('shows a single report', function (): void {
     $report = DamageReport::factory()->create();
 
-    $this->getJson("/reports/{$report->id}")
+    $this->getJson("/api/reports/{$report->id}")
         ->assertOk()
         ->assertJsonPath('data.id', $report->id);
 });
@@ -59,7 +59,7 @@ it('shows a single report', function (): void {
 it('updates a report and persists changes', function (): void {
     $report = DamageReport::factory()->create(['status' => ReportStatus::Draft]);
 
-    $this->patchJson("/reports/{$report->id}", [
+    $this->patchJson("/api/reports/{$report->id}", [
         'description' => 'Updated description.',
         'status' => ReportStatus::Submitted->value,
     ])->assertOk()
@@ -70,5 +70,5 @@ it('updates a report and persists changes', function (): void {
 });
 
 it('returns 404 for a missing report', function (): void {
-    $this->getJson('/reports/999')->assertNotFound();
+    $this->getJson('/api/reports/999')->assertNotFound();
 });

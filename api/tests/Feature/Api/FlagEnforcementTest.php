@@ -6,13 +6,13 @@ use App\Models\FeatureFlag;
 it('returns 410 when the flag is disabled', function (): void {
     FeatureFlag::factory()->disabled()->create(['name' => 'reports.bulk_actions']);
 
-    $this->deleteJson('/reports/bulk', ['ids' => [1, 2, 3]])
+    $this->deleteJson('/api/reports/bulk', ['ids' => [1, 2, 3]])
         ->assertStatus(410)
         ->assertJson(['error' => 'feature_disabled', 'flag' => 'reports.bulk_actions']);
 });
 
 it('returns 410 when the flag does not exist', function (): void {
-    $this->deleteJson('/reports/bulk', ['ids' => [1]])
+    $this->deleteJson('/api/reports/bulk', ['ids' => [1]])
         ->assertStatus(410);
 });
 
@@ -20,7 +20,7 @@ it('executes the mutation when the flag is enabled', function (): void {
     FeatureFlag::factory()->create(['name' => 'reports.bulk_actions', 'enabled' => true]);
     $reports = DamageReport::factory()->count(2)->create();
 
-    $this->deleteJson('/reports/bulk', ['ids' => $reports->pluck('id')->all()])
+    $this->deleteJson('/api/reports/bulk', ['ids' => $reports->pluck('id')->all()])
         ->assertOk()
         ->assertJson(['deleted' => 2]);
 
@@ -35,14 +35,14 @@ it('passes attributes through the context for attribute-gated flags', function (
     ]);
 
     // Customer role → attribute rule fails → 410
-    $this->deleteJson('/reports/bulk', [
+    $this->deleteJson('/api/reports/bulk', [
         'ids' => [],
         'subject' => 'user-1',
         'attributes' => ['role' => 'customer'],
     ])->assertStatus(410);
 
     // Admin role → attribute rule passes → proceeds to controller
-    $this->deleteJson('/reports/bulk', [
+    $this->deleteJson('/api/reports/bulk', [
         'ids' => [],
         'subject' => 'user-1',
         'attributes' => ['role' => 'admin'],

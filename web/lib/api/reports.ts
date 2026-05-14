@@ -62,19 +62,19 @@ async function jsonRequest<T>(
 }
 
 export async function listReports(): Promise<DamageReport[]> {
-  const payload = await jsonRequest<Envelope<DamageReport[]>>("/reports");
+  const payload = await jsonRequest<Envelope<DamageReport[]>>("/api/reports");
   return payload.data;
 }
 
 export async function getReport(id: number): Promise<DamageReport> {
-  const payload = await jsonRequest<Envelope<DamageReport>>(`/reports/${id}`);
+  const payload = await jsonRequest<Envelope<DamageReport>>(`/api/reports/${id}`);
   return payload.data;
 }
 
 export async function createReport(
   input: ReportInput,
 ): Promise<DamageReport> {
-  const payload = await jsonRequest<Envelope<DamageReport>>("/reports", {
+  const payload = await jsonRequest<Envelope<DamageReport>>("/api/reports", {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -85,7 +85,7 @@ export async function updateReport(
   id: number,
   input: Partial<ReportInput>,
 ): Promise<DamageReport> {
-  const payload = await jsonRequest<Envelope<DamageReport>>(`/reports/${id}`, {
+  const payload = await jsonRequest<Envelope<DamageReport>>(`/api/reports/${id}`, {
     method: "PATCH",
     body: JSON.stringify(input),
   });
