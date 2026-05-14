@@ -8,11 +8,11 @@ use Illuminate\Support\Carbon;
 /**
  * Decides whether a feature flag is on for a given EvaluationContext.
  *
- * Evaluation order — a flag is ON only if ALL steps pass:
+ * Evaluation order — a feature flag is ON only if ALL steps pass:
  *   1. Master switch (enabled)
  *   2. Schedule window (starts_at / ends_at)
  *   3. Attribute rules (AND-ed clauses; empty list → all subjects eligible)
- *   4. Rollout percentage (sticky per subject+flag hash; null → 100 %)
+ *   4. Rollout percentage (sticky per subject hash; null → 100 %)
  */
 final readonly class Evaluator
 {

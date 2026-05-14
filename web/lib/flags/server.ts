@@ -19,7 +19,7 @@ export async function evaluateFlags(
   request: EvaluateRequest,
 ): Promise<FlagDecisions> {
   try {
-    const response = await fetch(`${apiBaseUrl}/api/flags/evaluate`, {
+    const response = await fetch(`${apiBaseUrl}/api/feature_flags/evaluate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

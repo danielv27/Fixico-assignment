@@ -14,7 +14,7 @@ make fresh       # wipe volumes and rebuild
 | URL | What |
 |---|---|
 | http://localhost:3001 | Next.js damage-report client |
-| http://localhost:8000/admin/flags | Laravel Blade admin |
+| http://localhost:8000/admin/feature_flags | Laravel Blade admin |
 | http://localhost:8000/api | JSON API |
 
 ## Architecture
@@ -55,7 +55,7 @@ The cache stores plain arrays, not Eloquent models — `unserialize()` doesn't t
 
 When a user sees a feature, the flag flips off mid-session, and they try to act — the mutation endpoint re-evaluates the flag and returns **`410 Gone`** with `{"error": "feature_disabled", "flag": "..."}`. The client surfaces an inline message. 410 (not 403) because the resource existed and is no longer available.
 
-Two endpoints are gated this way via a `flag:` route middleware:
+Two endpoints are gated this way via a `feature_flag:` route middleware:
 
 - `DELETE /api/reports/bulk` — gated by `reports.bulk_actions`
 - `POST /api/reports/{id}/photos` — gated by `reports.photo_attachments`

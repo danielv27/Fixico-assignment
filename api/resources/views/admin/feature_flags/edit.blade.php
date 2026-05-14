@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('admin.flags.index') }}"
+        <a href="{{ route('admin.feature_flags.index') }}"
            class="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -33,11 +33,11 @@
         to stay associated with the update form even though it lives outside it.
     --}}
 
-    <form id="update-form" method="POST" action="{{ route('admin.flags.update', $flag) }}">
+    <form id="update-form" method="POST" action="{{ route('admin.feature_flags.update', $flag) }}">
         @csrf
         @method('PATCH')
 
-        @include('admin.flags._form', [
+        @include('admin.feature_flags._form', [
             'rulesJson'   => old('attribute_rules', json_encode($flag->attribute_rules ?? [])),
             'pct'         => old('rollout_percentage', $flag->rollout_percentage),
             'startsAt'    => old('starts_at', $flag->starts_at?->format('Y-m-d\TH:i')),
@@ -49,7 +49,7 @@
     </form>
 
     {{-- Delete form: completely separate from the update form above --}}
-    <form id="delete-form" method="POST" action="{{ route('admin.flags.destroy', $flag) }}">
+    <form id="delete-form" method="POST" action="{{ route('admin.feature_flags.destroy', $flag) }}">
         @csrf
         @method('DELETE')
     </form>
@@ -65,7 +65,7 @@
         </button>
 
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.flags.index') }}"
+            <a href="{{ route('admin.feature_flags.index') }}"
                class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
                 Cancel
             </a>

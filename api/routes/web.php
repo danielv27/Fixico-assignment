@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\Admin\FlagWebController;
+use App\Http\Controllers\Admin\FeatureFlagWebController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
-    Route::get('/flags', [FlagWebController::class, 'index'])->name('flags.index');
-    Route::get('/flags/create', [FlagWebController::class, 'create'])->name('flags.create');
-    Route::post('/flags', [FlagWebController::class, 'store'])->name('flags.store');
-    Route::get('/flags/{flag}/edit', [FlagWebController::class, 'edit'])->name('flags.edit');
-    Route::patch('/flags/{flag}', [FlagWebController::class, 'update'])->name('flags.update');
-    Route::delete('/flags/{flag}', [FlagWebController::class, 'destroy'])->name('flags.destroy');
+    Route::get('/feature_flags', [FeatureFlagWebController::class, 'index'])->name('feature_flags.index');
+    Route::get('/feature_flags/create', [FeatureFlagWebController::class, 'create'])->name('feature_flags.create');
+    Route::post('/feature_flags', [FeatureFlagWebController::class, 'store'])->name('feature_flags.store');
+    Route::get('/feature_flags/{flag}/edit', [FeatureFlagWebController::class, 'edit'])->name('feature_flags.edit');
+    Route::patch('/feature_flags/{flag}', [FeatureFlagWebController::class, 'update'])->name('feature_flags.update');
+    Route::delete('/feature_flags/{flag}', [FeatureFlagWebController::class, 'destroy'])->name('feature_flags.destroy');
 });

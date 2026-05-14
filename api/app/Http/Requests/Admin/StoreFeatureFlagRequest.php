@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreFlagRequest extends FormRequest
+class StoreFeatureFlagRequest extends FormRequest
 {
     /** @var list<string> */
     private const ALLOWED_ATTRIBUTES = ['country', 'role'];

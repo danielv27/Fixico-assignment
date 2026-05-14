@@ -6,7 +6,7 @@ use App\Models\FeatureFlag;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 /**
- * Single-key cache of every flag, refreshed on writes via FlagObserver.
+ * Single-key cache of every feature flag, refreshed on writes via FlagObserver.
  *
  * The cache stores plain associative arrays, not Eloquent models. Why arrays
  * specifically: PHP's unserialize() doesn't run the autoloader for unknown
@@ -14,9 +14,6 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
  * __PHP_Incomplete_Class on the second hit. Arrays round-trip cleanly,
  * and we rehydrate to non-persisted FeatureFlag instances on read so the
  * evaluator works in the model's natural shape.
- *
- * Key is versioned — bump when the cached column set changes to avoid stale
- * entries from a previous schema missing newly required fields.
  */
 final readonly class FlagCache
 {

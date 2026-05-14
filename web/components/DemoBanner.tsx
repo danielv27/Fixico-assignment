@@ -18,12 +18,12 @@ export function DemoBanner() {
         </span>
         Feature flag service is active. Manage flags at{" "}
         <a
-          href="http://localhost:8000/admin/flags"
+          href="http://localhost:8000/admin/feature_flags"
           target="_blank"
           rel="noopener noreferrer"
           className="font-semibold underline underline-offset-2 hover:text-emerald-900 dark:hover:text-emerald-100"
         >
-          localhost:8000/admin/flags ↗
+          localhost:8000/admin/feature_flags ↗
         </a>
       </p>
       <button

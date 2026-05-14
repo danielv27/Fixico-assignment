@@ -11,7 +11,7 @@ it('renders the flag index page', function (): void {
     FeatureFlag::factory()->create(['name' => 'alpha.flag', 'enabled' => true]);
     FeatureFlag::factory()->disabled()->create(['name' => 'beta.flag']);
 
-    $this->get(route('admin.flags.index'))
+    $this->get(route('admin.feature_flags.index'))
         ->assertOk()
         ->assertSee('alpha.flag')
         ->assertSee('beta.flag')
@@ -19,7 +19,7 @@ it('renders the flag index page', function (): void {
 });
 
 it('shows an empty state when there are no flags', function (): void {
-    $this->get(route('admin.flags.index'))
+    $this->get(route('admin.feature_flags.index'))
         ->assertOk()
         ->assertSee('No feature flags yet');
 });
@@ -32,7 +32,7 @@ it('shows the correct status badge for each flag state', function (): void {
         'starts_at' => now()->addDay(),
     ]);
 
-    $this->get(route('admin.flags.index'))
+    $this->get(route('admin.feature_flags.index'))
         ->assertOk()
         ->assertSee('Active')
         ->assertSee('Disabled')
@@ -44,7 +44,7 @@ it('shows the correct status badge for each flag state', function (): void {
 // ---------------------------------------------------------------------------
 
 it('renders the create form', function (): void {
-    $this->get(route('admin.flags.create'))
+    $this->get(route('admin.feature_flags.create'))
         ->assertOk()
         ->assertSee('New flag')
         ->assertSee('Add rule');
@@ -55,12 +55,12 @@ it('renders the create form', function (): void {
 // ---------------------------------------------------------------------------
 
 it('creates a flag with only the required fields', function (): void {
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'reports.test',
         'description' => '',
         'enabled' => '1',
         'attribute_rules' => '[]',
-    ])->assertRedirect(route('admin.flags.index'));
+    ])->assertRedirect(route('admin.feature_flags.index'));
 
     $this->assertDatabaseHas('feature_flags', [
         'name' => 'reports.test',
@@ -71,7 +71,7 @@ it('creates a flag with only the required fields', function (): void {
 it('creates a flag with attribute rules and percentage', function (): void {
     $rules = json_encode([['attribute' => 'role', 'values' => ['admin']]]);
 
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'admin.only',
         'enabled' => '1',
         'attribute_rules' => $rules,
@@ -85,7 +85,7 @@ it('creates a flag with attribute rules and percentage', function (): void {
 });
 
 it('creates a disabled flag', function (): void {
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'inactive.flag',
         'enabled' => '0',
         'attribute_rules' => '[]',
@@ -97,7 +97,7 @@ it('creates a disabled flag', function (): void {
 it('flushes the cache after creating a flag', function (): void {
     Cache::put('flags:index:v2', [['name' => 'old', 'enabled' => true]], 300);
 
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'new.flag',
         'enabled' => '1',
         'attribute_rules' => '[]',
@@ -111,7 +111,7 @@ it('flushes the cache after creating a flag', function (): void {
 // ---------------------------------------------------------------------------
 
 it('rejects a blank name', function (): void {
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => '',
         'enabled' => '1',
     ])->assertSessionHasErrors(['name']);
@@ -120,7 +120,7 @@ it('rejects a blank name', function (): void {
 it('rejects a duplicate flag name', function (): void {
     FeatureFlag::factory()->create(['name' => 'existing.flag']);
 
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'existing.flag',
         'enabled' => '1',
         'attribute_rules' => '[]',
@@ -128,14 +128,14 @@ it('rejects a duplicate flag name', function (): void {
 });
 
 it('rejects an invalid flag name format', function (): void {
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'Invalid Name!',
         'enabled' => '1',
     ])->assertSessionHasErrors(['name']);
 });
 
 it('rejects a rollout_percentage above 100', function (): void {
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'pct.flag',
         'enabled' => '1',
         'attribute_rules' => '[]',
@@ -144,7 +144,7 @@ it('rejects a rollout_percentage above 100', function (): void {
 });
 
 it('rejects ends_at before starts_at', function (): void {
-    $this->post(route('admin.flags.store'), [
+    $this->post(route('admin.feature_flags.store'), [
         'name' => 'sched.flag',
         'enabled' => '1',
         'attribute_rules' => '[]',
@@ -166,7 +166,7 @@ it('renders the edit form pre-filled with existing values', function (): void {
         'rollout_percentage' => 25,
     ]);
 
-    $this->get(route('admin.flags.edit', $flag))
+    $this->get(route('admin.feature_flags.edit', $flag))
         ->assertOk()
         ->assertSee('editable.flag')
         ->assertSee('My description')
@@ -181,11 +181,11 @@ it('renders the edit form pre-filled with existing values', function (): void {
 it('updates description and enabled state', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true, 'description' => 'Old']);
 
-    $this->patch(route('admin.flags.update', $flag), [
+    $this->patch(route('admin.feature_flags.update', $flag), [
         'description' => 'New description',
         'enabled' => '0',
         'attribute_rules' => '[]',
-    ])->assertRedirect(route('admin.flags.index'));
+    ])->assertRedirect(route('admin.feature_flags.index'));
 
     $flag->refresh();
     expect($flag->description)->toBe('New description')
@@ -195,7 +195,7 @@ it('updates description and enabled state', function (): void {
 it('updates attribute rules and rollout percentage', function (): void {
     $flag = FeatureFlag::factory()->create();
 
-    $this->patch(route('admin.flags.update', $flag), [
+    $this->patch(route('admin.feature_flags.update', $flag), [
         'enabled' => '1',
         'attribute_rules' => '[{"attribute":"role","values":["admin"]}]',
         'rollout_percentage' => '75',
@@ -209,7 +209,7 @@ it('updates attribute rules and rollout percentage', function (): void {
 it('clears rollout percentage when blank is submitted', function (): void {
     $flag = FeatureFlag::factory()->withPercentage(50)->create();
 
-    $this->patch(route('admin.flags.update', $flag), [
+    $this->patch(route('admin.feature_flags.update', $flag), [
         'enabled' => '1',
         'attribute_rules' => '[]',
         'rollout_percentage' => '',
@@ -222,7 +222,7 @@ it('flushes the cache after updating', function (): void {
     $flag = FeatureFlag::factory()->create(['enabled' => true]);
     Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
 
-    $this->patch(route('admin.flags.update', $flag), [
+    $this->patch(route('admin.feature_flags.update', $flag), [
         'enabled' => '0',
         'attribute_rules' => '[]',
     ]);
@@ -233,7 +233,7 @@ it('flushes the cache after updating', function (): void {
 it('does not update the flag name', function (): void {
     $flag = FeatureFlag::factory()->create(['name' => 'original.name']);
 
-    $this->patch(route('admin.flags.update', $flag), [
+    $this->patch(route('admin.feature_flags.update', $flag), [
         'name' => 'new.name',   // name is not in UpdateFlagRequest rules
         'enabled' => '1',
         'attribute_rules' => '[]',
@@ -249,7 +249,7 @@ it('does not update the flag name', function (): void {
 it('PATCH does NOT delete the flag (nested-form regression)', function (): void {
     $flag = FeatureFlag::factory()->create();
 
-    $this->patch(route('admin.flags.update', $flag), [
+    $this->patch(route('admin.feature_flags.update', $flag), [
         'enabled' => '1',
         'attribute_rules' => '[]',
     ])->assertRedirect();
@@ -264,8 +264,8 @@ it('PATCH does NOT delete the flag (nested-form regression)', function (): void 
 it('deletes a flag', function (): void {
     $flag = FeatureFlag::factory()->create();
 
-    $this->delete(route('admin.flags.destroy', $flag))
-        ->assertRedirect(route('admin.flags.index'));
+    $this->delete(route('admin.feature_flags.destroy', $flag))
+        ->assertRedirect(route('admin.feature_flags.index'));
 
     $this->assertDatabaseMissing('feature_flags', ['id' => $flag->id]);
 });
@@ -274,12 +274,12 @@ it('flushes the cache after deleting', function (): void {
     $flag = FeatureFlag::factory()->create();
     Cache::put('flags:index:v2', [['name' => $flag->name, 'enabled' => true]], 300);
 
-    $this->delete(route('admin.flags.destroy', $flag));
+    $this->delete(route('admin.feature_flags.destroy', $flag));
 
     expect(Cache::get('flags:index:v2'))->toBeNull();
 });
 
 it('returns 404 when deleting a non-existent flag', function (): void {
-    $this->delete(route('admin.flags.destroy', 99999))
+    $this->delete(route('admin.feature_flags.destroy', 99999))
         ->assertNotFound();
 });

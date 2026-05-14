@@ -11,9 +11,9 @@ use Illuminate\Http\Request;
 
 /**
  * Enforces that a named feature flag is currently enabled for the request
- * subject/attributes. Returns 410 Gone when the flag is off.
+ * subject/attributes. Returns 410 Gone when the feature flag is off.
  *
- * Usage in routes: Route::middleware('flag:reports.bulk_actions')
+ * Usage in routes: Route::middleware('feature_flag:reports.bulk_actions')
  *
  * Why 410 (Gone) rather than 403 (Forbidden): 403 implies the client lacks
  * permission and should not retry. 410 means the resource/feature existed
@@ -22,7 +22,7 @@ use Illuminate\Http\Request;
  * interact anyway. The client interprets 410 as "feature was removed" and
  * surfaces a toast rather than an access-denied error.
  */
-class RequireFlag
+class RequireFeatureFlag
 {
     public function __construct(private Evaluator $evaluator) {}
 

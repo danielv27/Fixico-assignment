@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Feature flags</h1>
             <p class="mt-1 text-sm text-zinc-500">Control rollouts, targeting, and schedules.</p>
         </div>
-        <a href="{{ route('admin.flags.create') }}"
+        <a href="{{ route('admin.feature_flags.create') }}"
            class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -26,7 +26,7 @@
             </div>
             <p class="mt-3 text-sm font-semibold text-zinc-700">No feature flags yet</p>
             <p class="mt-1 text-sm text-zinc-500">Create your first flag to start controlling rollouts.</p>
-            <a href="{{ route('admin.flags.create') }}"
+            <a href="{{ route('admin.feature_flags.create') }}"
                class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
                 Create flag
             </a>
@@ -154,7 +154,7 @@
 
                             {{-- Pencil edit button --}}
                             <td class="px-4 py-4">
-                                <a href="{{ route('admin.flags.edit', $flag) }}"
+                                <a href="{{ route('admin.feature_flags.edit', $flag) }}"
                                    title="Edit {{ $flag->name }}"
                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-800 hover:shadow">
                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -177,7 +177,7 @@ function inlineToggle(id, initial) {
         async toggle() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/admin/flags/${id}`, {
+                const res = await fetch(`/api/admin/feature_flags/${id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ enabled: !this.enabled }),
