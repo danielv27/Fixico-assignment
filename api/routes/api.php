@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\FlagController;
 use App\Http\Controllers\Api\BulkDeleteReportsController;
 use App\Http\Controllers\Api\DamageReportController;
 use App\Http\Controllers\Api\FlagEvaluationController;
+use App\Http\Controllers\Api\ReportPhotosController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => response()->json(['name' => 'Fixico API', 'status' => 'ok']));
@@ -25,6 +26,8 @@ Route::get('/reports/{report}', [DamageReportController::class, 'show']);
 Route::patch('/reports/{report}', [DamageReportController::class, 'update']);
 
 // Feature-gated mutations — return 410 when the backing flag is disabled.
+Route::post('/reports/{report}/photos', [ReportPhotosController::class, 'store'])
+    ->middleware('flag:reports.photo_attachments');
 // This is the server-side enforcement of the stale-interaction contract:
 // even if the client already rendered the UI, the server never executes
 // a flagged mutation when the flag is off.

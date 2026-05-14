@@ -1,0 +1,31 @@
+import "server-only";
+
+import { cookies } from "next/headers";
+
+const COOKIE = "fixico_viewer";
+
+export type ViewerProfile = {
+  country: string;
+  role: string;
+};
+
+export const DEFAULT_PROFILE: ViewerProfile = { country: "NL", role: "customer" };
+
+export async function getViewerProfile(): Promise<ViewerProfile> {
+  const jar = await cookies();
+  const raw = jar.get(COOKIE)?.value;
+
+  if (!raw) return DEFAULT_PROFILE;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<ViewerProfile>;
+    return {
+      country: typeof parsed.country === "string" ? parsed.country : DEFAULT_PROFILE.country,
+      role: typeof parsed.role === "string" ? parsed.role : DEFAULT_PROFILE.role,
+    };
+  } catch {
+    return DEFAULT_PROFILE;
+  }
+}
+
+export const VIEWER_COOKIE = COOKIE;
