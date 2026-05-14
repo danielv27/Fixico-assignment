@@ -40,8 +40,8 @@ class FlagWebController extends Controller
     {
         $flag->update($request->validated());
 
-        return redirect()->route('admin.flags.edit', $flag)
-            ->with('success', 'Flag saved.');
+        return redirect()->route('admin.flags.index')
+            ->with('success', "'{$flag->name}' saved.");
     }
 
     public function destroy(FeatureFlag $flag): RedirectResponse

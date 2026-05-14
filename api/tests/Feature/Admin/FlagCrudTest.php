@@ -86,3 +86,15 @@ it('busts the flag cache on delete', function (): void {
 
     expect(Cache::get('flags:index:v2'))->toBeNull();
 });
+
+it('can toggle enabled with a minimal payload (inline list toggle)', function (): void {
+    $flag = FeatureFlag::factory()->create(['enabled' => true]);
+
+    $this->patchJson("/api/admin/flags/{$flag->id}", ['enabled' => false])
+        ->assertOk()
+        ->assertJsonPath('data.enabled', false);
+
+    $this->patchJson("/api/admin/flags/{$flag->id}", ['enabled' => true])
+        ->assertOk()
+        ->assertJsonPath('data.enabled', true);
+});

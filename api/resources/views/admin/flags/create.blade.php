@@ -3,89 +3,53 @@
 @section('title', 'New flag')
 
 @section('content')
-    <div class="flex items-center gap-4">
-        <a href="{{ route('admin.flags.index') }}" class="text-sm text-zinc-500 hover:text-zinc-900">← Flags</a>
-        <h1 class="text-3xl font-semibold tracking-tight">New flag</h1>
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{{ route('admin.flags.index') }}"
+           class="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Flags
+        </a>
+        <span class="text-zinc-300">/</span>
+        <h1 class="text-xl font-semibold tracking-tight">New flag</h1>
     </div>
 
-    <form method="POST" action="{{ route('admin.flags.store') }}" class="mt-6 flex flex-col gap-4">
+    <form method="POST" action="{{ route('admin.flags.store') }}">
         @csrf
 
-        <div class="flex flex-col gap-1">
-            <label for="name" class="text-sm font-medium">
-                Name
-                <span class="font-normal text-zinc-500">(lowercase · dots · hyphens — e.g. reports.bulk_delete)</span>
-            </label>
-            <input id="name" name="name" type="text" value="{{ old('name') }}"
-                   placeholder="reports.my_feature"
-                   class="rounded border border-zinc-300 bg-white px-3 py-2 font-mono text-sm @error('name') border-red-400 @enderror">
-            @error('name')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="flex flex-col gap-1">
-            <label for="description" class="text-sm font-medium">Description</label>
-            <textarea id="description" name="description" rows="2"
-                      class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm">{{ old('description') }}</textarea>
-            @error('description')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <input type="hidden" name="enabled" value="0">
-        <label class="flex cursor-pointer items-center gap-3">
-            <input type="checkbox" name="enabled" value="1" {{ old('enabled') ? 'checked' : '' }} class="h-4 w-4 rounded border-zinc-300">
-            <span class="text-sm font-medium">Enabled</span>
-        </label>
-
-        <div class="flex flex-col gap-1">
-            <label for="attribute_rules" class="text-sm font-medium">
-                Attribute rules
-                <span class="font-normal text-zinc-500">(JSON array — allowed attributes: country, role)</span>
-            </label>
-            <textarea id="attribute_rules" name="attribute_rules" rows="3"
-                      placeholder='[{"attribute":"role","values":["admin"]}]'
-                      class="rounded border border-zinc-300 bg-white px-3 py-2 font-mono text-sm @error('attribute_rules.*') border-red-400 @enderror">{{ old('attribute_rules', '[]') }}</textarea>
-            @error('attribute_rules.*')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="flex flex-col gap-1">
-            <label for="rollout_percentage" class="text-sm font-medium">
-                Rollout percentage
-                <span class="font-normal text-zinc-500">(0–100 · blank = 100 %)</span>
-            </label>
-            <input id="rollout_percentage" name="rollout_percentage" type="number" min="0" max="100"
-                   value="{{ old('rollout_percentage') }}"
-                   class="w-32 rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('rollout_percentage') border-red-400 @enderror">
-            @error('rollout_percentage')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col gap-1">
-                <label for="starts_at" class="text-sm font-medium">Activates at</label>
-                <input id="starts_at" name="starts_at" type="datetime-local" value="{{ old('starts_at') }}"
-                       class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('starts_at') border-red-400 @enderror">
-                @error('starts_at')
-                    <p class="text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="flex flex-col gap-1">
-                <label for="ends_at" class="text-sm font-medium">Expires at</label>
-                <input id="ends_at" name="ends_at" type="datetime-local" value="{{ old('ends_at') }}"
-                       class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('ends_at') border-red-400 @enderror">
-                @error('ends_at')
-                    <p class="text-sm text-red-600">{{ $message }}</p>
+        {{-- Name (create-only) --}}
+        <div class="mb-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h2 class="text-sm font-semibold text-zinc-800">Flag name</h2>
+            <p class="mt-0.5 text-xs text-zinc-500">Lowercase, dots, underscores, hyphens. Cannot be changed after creation.</p>
+            <div class="mt-4">
+                <input id="name" name="name" type="text" value="{{ old('name') }}"
+                       placeholder="reports.my_feature"
+                       autofocus
+                       class="w-full rounded-lg border border-zinc-300 px-3 py-2 font-mono text-sm text-zinc-900 placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 @error('name') border-red-400 @enderror">
+                @error('name')
+                    <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
                 @enderror
             </div>
         </div>
 
-        <div>
-            <button type="submit" class="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+        @include('admin.flags._form', [
+            'rulesJson'   => old('attribute_rules', '[]'),
+            'pct'         => old('rollout_percentage'),
+            'startsAt'    => old('starts_at', ''),
+            'endsAt'      => old('ends_at', ''),
+            'description' => old('description', ''),
+            'enabled'     => old('enabled', false),
+            'flagName'    => null,  // read from name input live in JS
+        ])
+
+        <div class="mt-6 flex items-center justify-end gap-3">
+            <a href="{{ route('admin.flags.index') }}"
+               class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors">
                 Create flag
             </button>
         </div>
