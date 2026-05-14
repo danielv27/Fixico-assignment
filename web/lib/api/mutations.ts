@@ -11,7 +11,7 @@ type BulkDeleteResult =
   | { type: "error"; status: number };
 
 export async function bulkDeleteReports(ids: number[]): Promise<BulkDeleteResult> {
-  const res = await fetch(`${apiBaseUrl}/reports/bulk`, {
+  const res = await fetch(`${apiBaseUrl}/api/reports/bulk`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ ids }),

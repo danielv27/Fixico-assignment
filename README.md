@@ -1,194 +1,84 @@
 # Fixico Feature Flag Service
 
-A feature flag service built as a full-stack take-home assignment. Two distinct apps share one Docker Compose stack: a **Laravel admin + API** and a **Next.js damage-reports client** that consumes the flags.
+A take-home assignment: Laravel admin + API in `api/`, Next.js client in `web/`, wired through Docker Compose.
 
----
-
-## Quick start
+## Run
 
 ```bash
-make bootstrap   # first time: start, migrate, seed demo data
+make bootstrap   # first time
 make up          # subsequent starts
 make down        # stop
-make fresh       # wipe volumes + bootstrap from scratch
-make             # list all available targets
+make fresh       # wipe volumes and rebuild
 ```
 
-| Service | URL |
+| URL | What |
 |---|---|
-| Next.js client | http://localhost:3001 |
-| Laravel admin + API | http://localhost:8000 |
-| Postgres | localhost:5433 |
-| Redis | localhost:6379 |
-
----
+| http://localhost:3001 | Next.js damage-report client |
+| http://localhost:8000/admin/flags | Laravel Blade admin |
+| http://localhost:8000/api | JSON API |
 
 ## Architecture
 
-The assignment separates "admin and API (the back-end)" from "client (the front-end)" — these are genuinely two different apps.
-
-| App | Technology | Responsibility |
+| App | Stack | Responsibility |
 |---|---|---|
-| **Admin + API** | Laravel 13 · Blade · Pest | Flag management UI, flag evaluation JSON API, damage-report CRUD API |
-| **Client** | Next.js 16 · React 19 | Damage reports UI, conditionally rendered components driven by flags |
+| Laravel 13 | Blade + JSON API | Flag management UI, evaluation endpoint, reports API |
+| Next.js 16 | React 19 RSC | Damage reports UI with flag-driven conditional components |
 
-The client never renders admin pages. Flags are managed at **localhost:8000/admin/flags** and consumed via the evaluation endpoint.
+Admin lives in Laravel (the assignment says "admin environment (the back-end)"). The Next.js app is purely the client.
 
----
+## Flag evaluation
 
-## Feature Flag System
+A flag is **on** only if all four steps pass, in order:
 
-### Schema
+1. `enabled` master switch
+2. inside `[starts_at, ends_at]` (schedule)
+3. `attribute_rules` match the request context (AND of `{attribute, values}` clauses)
+4. subject's bucket `< rollout_percentage`
 
-```sql
-feature_flags
-  id                bigserial
-  name              text unique          -- slug: "reports.bulk_actions"
-  description       text nullable
-  enabled           bool default false   -- master switch
-  attribute_rules   jsonb default '[]'   -- audience targeting
-  rollout_percentage smallint nullable   -- 0–100, null = 100%
-  starts_at         timestamptz nullable -- scheduled activation
-  ends_at           timestamptz nullable -- scheduled expiration
-```
+### Rollout strategy — `abs(crc32(subject)) % 100`
 
-The `attribute_rules` column stores a list of `{ attribute, values }` clauses. Example:
+A subject is whatever identifies a user — in the demo, a per-browser UUID stored as a cookie. CRC32 of that string maps deterministically to a bucket 0–99. If the bucket falls below the percentage threshold, the subject is in the rollout.
 
-```json
-[
-  { "attribute": "country", "values": ["NL", "BE"] },
-  { "attribute": "role",    "values": ["admin"] }
-]
-```
+**Why CRC32**: deterministic, fast, uniform — same subject always yields the same bucket, no storage needed. Not a cryptographic hash, which is fine because flags aren't a security mechanism.
 
-All clauses are AND-ed: the subject must match every clause. Within a clause, the subject's attribute value must be in the `values` list (OR logic). Attributes are validated against an allow-list (`country`, `role`) to prevent typo-driven silent mismatches.
+**Subject-only, not subject+flag**: the hash deliberately does **not** include the flag name. A user in bucket 17 sees every flag whose threshold is `> 17` — they're part of a stable cohort. This is right for product rollouts (gradual exposure to a beta cohort) but would be wrong for rigorous A/B testing where you need statistical independence between treatments. The simulator on the edit page makes this visual: drag the slider and you see exactly which subjects are in.
 
----
+**In production**: subjects would be v4 UUIDs (122 bits of randomness) which distribute uniformly across the 100 buckets naturally. The synthetic 200-user grid in the admin is purely illustrative.
 
-### Evaluation pipeline
+## Caching
 
-A flag resolves to **true** only if all four steps pass, in this order:
+Single Redis key (`flags:index:v2`) holds every flag. `FlagObserver` busts it on any Eloquent write so admin changes reflect on the next request. TTL (default 300s, override via `FEATURE_FLAGS_CACHE_TTL`) is a fallback for writes that bypass Eloquent — `make flush-flags` is the manual escape hatch.
 
-```
-1. enabled = true?               → false if master switch is off
-2. now ∈ [starts_at, ends_at]?   → false if outside the schedule window
-3. attribute_rules match?         → false if any clause fails (empty = everyone passes)
-4. rollout_percentage?            → false if the subject's bucket exceeds the threshold
-```
+The cache stores plain arrays, not Eloquent models — `unserialize()` doesn't trigger the autoloader for unknown classes, which would produce `__PHP_Incomplete_Class` on the second hit. Arrays round-trip cleanly; the cache hydrates non-persisted `FeatureFlag` instances on read.
 
-The order matters. Checking `enabled` first short-circuits the rest on the common "fully disabled" path. Checking the schedule before attribute rules means an expired flag rejects cleanly before evaluating the audience, which is the right semantics (the flag is over, not just not for you).
+## Stale-interaction handling
 
----
+When a user sees a feature, the flag flips off mid-session, and they try to act — the mutation endpoint re-evaluates the flag and returns **`410 Gone`** with `{"error": "feature_disabled", "flag": "..."}`. The client surfaces an inline message. 410 (not 403) because the resource existed and is no longer available.
 
-### Rollout percentage — how it works and why
+Two endpoints are gated this way via a `flag:` route middleware:
 
-**The mechanism:** `abs(crc32(subject)) % 100 < rollout_percentage`
+- `DELETE /api/reports/bulk` — gated by `reports.bulk_actions`
+- `POST /api/reports/{id}/photos` — gated by `reports.photo_attachments`
 
-A subject is any stable string that identifies a user — a UUID, email address, or in the demo a cookie-backed UUID generated by the browser on first visit. The CRC32 of that string is deterministically mapped to a bucket between 0 and 99. If the bucket falls below the percentage threshold the subject is in the rollout.
+## Demo viewer
 
-**Why CRC32?**
-
-- **Deterministic** — the same subject always produces the same bucket. No database lookup, no stored assignment. The decision is recomputable from just the subject string and the percentage.
-- **Fast** — a single hash + modulo, negligible in hot-path evaluation.
-- **Uniform** — CRC32 distributes strings evenly across the output range, so a 25% rollout genuinely reaches ~25% of any large population.
-
-CRC32 is not a cryptographic hash — a determined user who knows the algorithm and their subject ID can compute their bucket. This is acceptable because feature flags are not a security mechanism; they're a deployment tool.
-
-**Why user-consistent bucketing (not per-flag)?**
-
-An alternative is `crc32(subject + ":" + flagName)` — this gives each flag an independent random sample, which is useful for rigorous A/B experiments where you need statistical independence between treatments.
-
-For feature rollouts — where the goal is "gradually expose a cohort of early adopters to new functionality" — user-consistent bucketing is both more intuitive and more useful:
-
-- A user in bucket 17 sees every flag whose threshold is ≥ 18. They're part of your beta cohort across all features.
-- The admin simulator shows a stable "200 evenly distributed users" view. Dragging the percentage from 25% to 26% always adds exactly 2 new users to the rollout — the same 2 users regardless of which flag you're looking at.
-- In production, subjects would be v4 UUIDs (random, not sequential), which distribute uniformly across the 100 buckets without any bucketing engineering.
-
-The trade-off is correlation between flags: if you enable a 10% rollout on flag A and flag B, the same 10% of users get both. This would be a problem for an experimentation platform but is the right behaviour for a feature toggle service.
-
----
-
-### Caching
-
-All flags are cached as a single Redis key (`flags:index:v2`). On every evaluation request, one Redis read returns the entire flag set and the evaluation runs in PHP — no per-flag round-trips.
-
-**Why one key?** The typical access pattern is "evaluate every flag for this request". Per-flag keys would require N round-trips; the index is small (a few KB) and fits in one read.
-
-**Cache key versioning.** The key suffix (`v2`) is bumped when the cached column set changes. Old entries expire on their TTL without affecting new deployments.
-
-**Invalidation.** `FlagObserver` (registered via `#[ObservedBy]` on the model) calls `FlagCache::flush()` on any Eloquent `saved` or `deleted` event. Admin changes reflect within the next request, not the next TTL cycle.
-
-**TTL fallback.** The TTL (default 300 s, configurable via `FEATURE_FLAGS_CACHE_TTL` in `api/.env`) is a safety net for writes that bypass Eloquent (direct SQL via a GUI). Run `make flush-flags` to invalidate immediately.
-
-**Why store plain arrays, not Eloquent models?** PHP's `unserialize()` doesn't trigger the autoloader for custom classes, producing `__PHP_Incomplete_Class` on the second hit. Storing associative arrays sidesteps this entirely. On read, the cache hydrates non-persisted `FeatureFlag` instances via `forceFill()` so the evaluator works with the model's typed casts.
-
----
-
-### Conditional UI and stale-interaction handling
-
-**Three conditional components** in the client (each gated by a flag):
-
-| Component | Flag | Targeting |
-|---|---|---|
-| `DemoBanner` | `demo.banner` | all users |
-| `BulkActionsToolbar` | `reports.bulk_actions` | `role = admin` |
-| `PhotoAttachments` | `reports.photo_attachments` | 25 % rollout |
-| `NewReportBanner` | `report.new_form_layout` | `country = NL`, 50 % rollout |
-
-**Two gated mutations** with server-side enforcement:
-
-| Endpoint | Flag |
-|---|---|
-| `DELETE /reports/bulk` | `reports.bulk_actions` |
-| `POST /reports/{id}/photos` | `reports.photo_attachments` |
-
-**Stale-interaction policy:** when a user sees a flagged feature, the flag is disabled mid-session, and they try to act — the mutation endpoint re-evaluates the flag server-side and returns `410 Gone` with `{"error": "feature_disabled", "flag": "..."}` rather than executing the action. The client surfaces a contextual message. 410 (Gone) is used instead of 403 (Forbidden) because the resource existed and is no longer available — which is precisely the stale-interaction semantics.
-
-*Try it:* switch the demo viewer to `role = admin`, see the bulk toolbar, disable `reports.bulk_actions` in the admin, click "Delete selected" — the 410 message appears without a page reload.
-
----
-
-### Demo viewer switcher
-
-Because the client has no authentication, a **Demo viewer** pill in the nav bar simulates an authenticated session. Changing `country` or `role` re-evaluates all flags server-side on the next request, letting reviewers exercise targeting rules without logging in. This is a demo affordance only — a real deployment would derive the evaluation context from the JWT/session.
-
----
+The Next.js client has no authentication; a viewer pill in the nav (`Viewing as NL · customer`) stands in for an authenticated session. Switching country or role re-evaluates flags on the next request. In production the evaluation context would come from the JWT/session.
 
 ## Seeded flags
 
-| Flag | Human name | Targeting | Rollout |
-|---|---|---|---|
-| `demo.banner` | Banner | all users | 100 % |
-| `reports.bulk_actions` | Bulk actions | `role = admin` | 100 % of admins |
-| `report.new_form_layout` | New form layout | `country = NL` | 50 % of NL users |
-| `reports.photo_attachments` | Photo attachments | all users | 25 % |
+| Flag | Targeting | Rollout |
+|---|---|---|
+| `demo.banner` | all users | 100% |
+| `reports.bulk_actions` | `role = admin` | 100% of admins |
+| `report.new_form_layout` | `country = NL` | 50% of NL users |
+| `reports.photo_attachments` | all users | 25% |
 
----
-
-## Running tests
+## Tests
 
 ```bash
-make test                                           # 75 Pest tests
-docker compose exec api vendor/bin/pint --dirty     # PHP code style
-docker compose exec web npm run lint                # ESLint
-docker compose exec web npm run build               # Next.js production build
+make test                                            # 75 Pest tests
+docker compose exec api vendor/bin/pint --dirty      # PHP style
+docker compose exec web npm run lint                 # ESLint
 ```
 
-Test coverage spans:
-- **Unit** — `Evaluator` (all four pipeline steps, edge cases, percentage distribution), `FlagCache` (read-through, observer-triggered invalidation, bypass-observer behaviour)
-- **Feature/API** — flag CRUD (JSON), evaluation endpoint (batch shape, attribute filtering), 410 enforcement (enabled flag, disabled flag, attribute pass-through)
-- **Feature/Web** — flag admin Blade flows (index, create, update, delete, validation, cache flush, redirect after save)
-
----
-
-## Key design decisions
-
-| Decision | Choice | Rationale |
-|---|---|---|
-| Admin UI technology | Laravel Blade | The assignment says "admin environment (the back-end)". Blade keeps admin and API in the same process with zero client/server boundary. |
-| Flag evaluation location | Server-side (Laravel) on every request | Flags are cheap to evaluate; server-side means no client bundle, no flicker, no hydration mismatch. |
-| Flag evaluation in Next.js | RSC server fetch, result passed via context | The browser never sees the evaluation URL. No flag library shipped to the client. |
-| Cache strategy | Single Redis key, observer invalidation | One read per request regardless of flag count. TTL is a fallback; real-time invalidation via Eloquent observer is the primary path. |
-| Rollout bucketing | User-consistent (`crc32(subject) % 100`) | Stable cohort model — a user is always in or out of a given percentage regardless of flag. Better for product rollouts; per-flag independence would matter for A/B experiments. |
-| Stale interaction | 410 Gone on server-side re-check | The server is the source of truth. 410 means "was available, now gone" — semantically correct for a disabled feature. The client shows an inline message rather than a full-page error. |
-| No Pennant or similar | Custom implementation | Assignment requirement. The evaluator is ~60 lines of plain PHP with no framework coupling, making the logic explicit and testable. |
+Coverage: evaluator unit tests (all four pipeline steps, edge cases, percentage distribution), FlagCache (read-through, observer-triggered invalidation), admin Blade web flows (CRUD, validation, cache flush, redirect, nested-form regression), JSON API admin CRUD, evaluation endpoint, 410 enforcement.
