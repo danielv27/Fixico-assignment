@@ -1,11 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import {
-  setViewerProfile,
-  COUNTRIES_OPTIONS,
-  ROLE_OPTIONS,
-} from "@/lib/viewer/actions";
+import { setViewerProfile } from "@/lib/viewer/actions";
+import { COUNTRIES_OPTIONS, ROLE_OPTIONS } from "@/lib/viewer/constants";
 import type { ViewerProfile } from "@/lib/viewer/profile";
 
 type Props = { profile: ViewerProfile };
