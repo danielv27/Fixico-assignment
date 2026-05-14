@@ -118,6 +118,32 @@
         @enderror
     </div>
 
+    {{-- ── Schedule ─────────────────────────────────────────────────── --}}
+    <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-semibold text-zinc-800">Schedule <span class="font-normal text-zinc-400">(optional)</span></h2>
+        <p class="mt-0.5 text-xs text-zinc-500">Leave blank for no boundary on that side.</p>
+        <div class="mt-4 grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label for="starts_at" class="text-sm font-medium text-zinc-700">Activates at</label>
+                <input id="starts_at" name="starts_at" type="datetime-local"
+                       value="{{ old('starts_at', $startsAt ?? '') }}"
+                       class="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 @error('starts_at') border-red-400 @enderror">
+                @error('starts_at')
+                    <p class="text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label for="ends_at" class="text-sm font-medium text-zinc-700">Expires at</label>
+                <input id="ends_at" name="ends_at" type="datetime-local"
+                       value="{{ old('ends_at', $endsAt ?? '') }}"
+                       class="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 @error('ends_at') border-red-400 @enderror">
+                @error('ends_at')
+                    <p class="text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+    </div>
+
     {{-- ── Rollout percentage ───────────────────────────────────────── --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
          x-data="percentageSlider({{ $pct ?? 'null' }})">
@@ -155,16 +181,23 @@
             </div>
 
             {{-- ─ Distribution preview ────────────────────────────────── --}}
-            {{--
-                200 pre-computed subjects — exactly 2 per bucket — generated
-                once on init so CRC32 never runs at render time. At N% exactly
-                N*2 of 200 users are in rollout, making the percentage literal.
-            --}}
             <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4" x-init="buildSample()">
 
                 <div class="mb-3 flex items-center justify-between">
-                    <span class="text-xs font-semibold text-zinc-700">Distribution preview</span>
-                    <span class="text-xs text-zinc-400">200 evenly distributed users · 2 per bucket</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-zinc-700">Distribution preview</span>
+                        {{-- Tooltip: clarifies this is a demo illustration --}}
+                        <div class="group relative">
+                            <svg class="h-3.5 w-3.5 cursor-default text-zinc-400 hover:text-zinc-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="pointer-events-none absolute left-0 top-5 z-50 w-72 rounded-lg border border-zinc-200 bg-white p-3 text-xs leading-relaxed text-zinc-600 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                                <p class="font-semibold text-zinc-800">Illustration only</p>
+                                <p class="mt-1">These 200 users are synthetically generated with exactly 2 per bucket to demonstrate how percentage rollouts distribute evenly. In production, subjects are real user identifiers — UUIDs, emails, etc. — which naturally distribute the same way across buckets.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-zinc-400">200 demo users · 2 per bucket</span>
                 </div>
 
                 {{-- 10×10 bucket grid --}}
@@ -239,32 +272,6 @@
         <div x-show="!enabled" class="mt-3 text-xs text-zinc-400">100% of eligible users (no percentage limit applied)</div>
 
         <input type="hidden" name="rollout_percentage" :value="enabled ? value : ''">
-    </div>
-
-    {{-- ── Schedule ─────────────────────────────────────────────────── --}}
-    <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <h2 class="text-sm font-semibold text-zinc-800">Schedule <span class="font-normal text-zinc-400">(optional)</span></h2>
-        <p class="mt-0.5 text-xs text-zinc-500">Leave blank for no boundary on that side.</p>
-        <div class="mt-4 grid grid-cols-2 gap-4">
-            <div class="flex flex-col gap-1.5">
-                <label for="starts_at" class="text-sm font-medium text-zinc-700">Activates at</label>
-                <input id="starts_at" name="starts_at" type="datetime-local"
-                       value="{{ old('starts_at', $startsAt ?? '') }}"
-                       class="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 @error('starts_at') border-red-400 @enderror">
-                @error('starts_at')
-                    <p class="text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="flex flex-col gap-1.5">
-                <label for="ends_at" class="text-sm font-medium text-zinc-700">Expires at</label>
-                <input id="ends_at" name="ends_at" type="datetime-local"
-                       value="{{ old('ends_at', $endsAt ?? '') }}"
-                       class="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 @error('ends_at') border-red-400 @enderror">
-                @error('ends_at')
-                    <p class="text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-        </div>
     </div>
 
 </div>
