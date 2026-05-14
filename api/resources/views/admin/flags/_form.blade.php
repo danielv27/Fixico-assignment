@@ -120,7 +120,7 @@
 
     {{-- ── Rollout percentage ───────────────────────────────────────── --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
-         x-data="percentageSlider({{ $pct ?? 'null' }}, '{{ $flagName ?? '' }}')">
+         x-data="percentageSlider({{ $pct ?? 'null' }})">
 
         <div class="flex items-start justify-between">
             <div>
@@ -154,120 +154,56 @@
                 </div>
             </div>
 
-            {{-- ─ Rollout simulator ───────────────────────────────────── --}}
+            {{-- ─ Distribution preview ────────────────────────────────── --}}
+            {{--
+                200 pre-computed subjects — exactly 2 per bucket — so the
+                grid is always perfectly even. At N% exactly N*2 of 200 users
+                are in rollout, making the percentage literal and unambiguous.
+            --}}
             <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-
-                {{-- Header --}}
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-xs font-semibold text-zinc-700">
-                        <svg class="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        Rollout simulator
-                    </div>
-                    <button type="button" @click="generateSamples()"
-                            class="text-xs font-medium text-emerald-600 hover:text-emerald-800 transition-colors">
-                        + Generate sample users
-                    </button>
-                </div>
-                <p class="mt-0.5 mb-3 text-xs text-zinc-500">
-                    Add user IDs below — press <kbd class="rounded border border-zinc-300 bg-white px-1 py-0.5 font-mono text-[10px]">Enter</kbd>
-                    or comma to add each one. The grid shows all 100 buckets; the highlighted ones are in this rollout.
-                </p>
-
-                {{-- Tag input --}}
-                <div class="min-h-[2.5rem] flex flex-wrap gap-1.5 rounded-lg border border-zinc-300 bg-white p-2 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500">
-                    <template x-for="(subject, i) in subjects" :key="i">
-                        <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
-                              :class="isInRollout(subject)
-                                  ? 'bg-emerald-50 text-emerald-800 ring-emerald-200'
-                                  : 'bg-zinc-100 text-zinc-600 ring-zinc-200'">
-                            <span x-text="subject"></span>
-                            <span class="text-[10px] opacity-60" x-text="`#${getBucket(subject)}`"></span>
-                            <button type="button" @click="removeSubject(i)"
-                                    class="ml-0.5 opacity-50 hover:opacity-100 leading-none">&times;</button>
-                        </span>
-                    </template>
-                    <input type="text" x-model="tagInput"
-                           placeholder="user-id or email…"
-                           @keydown.enter.prevent="addTag()"
-                           @keydown.comma.prevent="addTag()"
-                           @keydown.backspace="tagInput === '' && subjects.length && removeSubject(subjects.length - 1)"
-                           class="min-w-[140px] flex-1 border-0 bg-transparent p-0.5 text-xs placeholder-zinc-400 focus:outline-none focus:ring-0">
+                <div class="mb-3 flex items-center justify-between">
+                    <span class="text-xs font-semibold text-zinc-700">Distribution preview</span>
+                    <span class="text-xs text-zinc-400">200 evenly distributed users · 2 per bucket</span>
                 </div>
 
-                {{-- Bucket grid --}}
-                <div x-show="getSlug()" class="mt-4">
-                    <div class="mb-2 flex items-center justify-between text-xs text-zinc-500">
-                        <span>100 buckets — <span class="font-medium text-emerald-700" x-text="`${value} in rollout`"></span>, <span x-text="`${100 - value} excluded`"></span></span>
-                        <div class="flex items-center gap-3">
-                            <span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-400"></span> in rollout</span>
-                            <span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded-sm bg-zinc-200"></span> excluded</span>
-                            <span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded-full bg-violet-500"></span> your users</span>
-                        </div>
-                    </div>
-                    <div class="grid gap-0.5" style="grid-template-columns: repeat(10, 1fr)">
-                        <template x-for="b in 100" :key="b">
-                            <div class="group relative flex h-7 cursor-default items-center justify-center rounded-sm text-[9px] font-medium transition-colors"
-                                 :class="(b-1) < value
-                                     ? (subjectsInBucket(b-1).length ? 'bg-emerald-300 text-emerald-900' : 'bg-emerald-100 text-emerald-600')
-                                     : (subjectsInBucket(b-1).length ? 'bg-violet-100 text-violet-700' : 'bg-zinc-200 text-zinc-400')"
-                                 :title="subjectsInBucket(b-1).length ? subjectsInBucket(b-1).join(', ') + ` (bucket ${b-1})` : `Bucket ${b-1}`">
-                                <span x-text="b-1"></span>
-                                <span x-show="subjectsInBucket(b-1).length > 0"
-                                      class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-violet-500"></span>
-                                {{-- Tooltip for cells with users --}}
-                                <div x-show="subjectsInBucket(b-1).length > 0"
-                                     class="pointer-events-none absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[10px] text-white group-hover:block">
-                                    <template x-for="s in subjectsInBucket(b-1)" :key="s">
-                                        <div x-text="s"></div>
-                                    </template>
-                                </div>
+                {{-- Grid: 100 buckets, each holding exactly 2 of the 200 users --}}
+                <div class="grid gap-0.5" style="grid-template-columns: repeat(10, 1fr)">
+                    <template x-for="b in 100" :key="b">
+                        <div class="group relative flex h-8 cursor-default flex-col items-center justify-center rounded-sm transition-colors"
+                             :class="(b-1) < value
+                                 ? 'bg-emerald-500 text-white'
+                                 : 'bg-zinc-200 text-zinc-400'"
+                             :title="`Bucket ${b-1} — ${(b-1) < value ? '2 users in rollout' : 'excluded'}`">
+                            <span class="text-[8px] font-medium leading-none opacity-60" x-text="b-1"></span>
+                            {{-- Two user dots --}}
+                            <div class="mt-0.5 flex gap-0.5">
+                                <span class="h-1 w-1 rounded-full"
+                                      :class="(b-1) < value ? 'bg-white/70' : 'bg-zinc-400/50'"></span>
+                                <span class="h-1 w-1 rounded-full"
+                                      :class="(b-1) < value ? 'bg-white/70' : 'bg-zinc-400/50'"></span>
                             </div>
-                        </template>
-                    </div>
+                        </div>
+                    </template>
                 </div>
 
-                {{-- Results table --}}
-                <div x-show="subjects.length > 0 && getSlug()" x-cloak class="mt-4">
-                    <div class="overflow-hidden rounded-lg border border-zinc-200">
-                        <table class="w-full text-xs">
-                            <thead>
-                                <tr class="border-b border-zinc-100 bg-zinc-50">
-                                    <th class="px-3 py-2 text-left font-medium text-zinc-500">User</th>
-                                    <th class="px-3 py-2 text-center font-medium text-zinc-500">Bucket</th>
-                                    <th class="px-3 py-2 text-left font-medium text-zinc-500">Result</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-zinc-100 bg-white">
-                                <template x-for="(subject, i) in subjects" :key="i">
-                                    <tr>
-                                        <td class="px-3 py-2 font-mono font-medium text-zinc-800" x-text="subject"></td>
-                                        <td class="px-3 py-2 text-center tabular-nums text-zinc-500" x-text="getBucket(subject)"></td>
-                                        <td class="px-3 py-2">
-                                            <span class="inline-flex items-center gap-1 font-medium"
-                                                  :class="isInRollout(subject) ? 'text-emerald-700' : 'text-zinc-400'">
-                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path x-show="isInRollout(subject)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                                    <path x-show="!isInRollout(subject)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                                                </svg>
-                                                <span x-text="isInRollout(subject) ? 'In rollout' : 'Excluded'"></span>
-                                                <span class="font-normal opacity-60"
-                                                      x-text="isInRollout(subject) ? `(${getBucket(subject)} < ${value})` : `(${getBucket(subject)} ≥ ${value})`"></span>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
+                {{-- Summary --}}
+                <div class="mt-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-xs text-zinc-500">
+                        <span class="flex items-center gap-1.5">
+                            <span class="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500"></span>
+                            In rollout
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="inline-block h-2.5 w-2.5 rounded-sm bg-zinc-200"></span>
+                            Excluded
+                        </span>
                     </div>
-                    <p class="mt-2 text-right text-xs text-zinc-400"
-                       x-text="`${subjects.filter(s => isInRollout(s)).length} of ${subjects.length} users in rollout (${value}% threshold)`"></p>
+                    <p class="text-xs font-medium text-zinc-700">
+                        <span class="text-emerald-700" x-text="value * 2"></span>
+                        <span class="font-normal text-zinc-500"> of 200 users · exactly </span>
+                        <span class="text-emerald-700" x-text="`${value}%`"></span>
+                    </p>
                 </div>
-
-                <p x-show="!getSlug()" x-cloak class="mt-3 text-xs text-amber-600">
-                    Enter the flag name above to enable the simulator.
-                </p>
             </div>
         </div>
 
@@ -351,83 +287,12 @@ function rulesBuilder(initial) {
 }
 
 // ---------------------------------------------------------------------------
-// CRC32 matching PHP's crc32() — used to replicate the evaluator's bucket
-// calculation client-side without a network call.
+// Percentage slider
 // ---------------------------------------------------------------------------
-const _crc32Table = (() => {
-    const t = new Uint32Array(256);
-    for (let i = 0; i < 256; i++) {
-        let c = i;
-        for (let j = 0; j < 8; j++) {
-            c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-        }
-        t[i] = c;
-    }
-    return t;
-})();
-
-function phpCrc32(str) {
-    const bytes = new TextEncoder().encode(str);
-    let crc = 0xFFFFFFFF;
-    for (const b of bytes) crc = _crc32Table[(crc ^ b) & 0xFF] ^ (crc >>> 8);
-    const unsigned = (crc ^ 0xFFFFFFFF) >>> 0;
-    // Replicate PHP's signed 32-bit integer return
-    return unsigned > 0x7FFFFFFF ? unsigned - 0x100000000 : unsigned;
-}
-
-function getBucket(subject) {
-    return Math.abs(phpCrc32(subject)) % 100;
-}
-
-// ---------------------------------------------------------------------------
-// Percentage slider + batch rollout simulator
-// ---------------------------------------------------------------------------
-function percentageSlider(initial, serverFlagName) {
+function percentageSlider(initial) {
     return {
         enabled: initial !== null,
         value: initial ?? 100,
-        _serverFlagName: serverFlagName,
-
-        // Tag input state
-        tagInput: '',
-        subjects: [],
-
-        // On create the name is typed live; on edit it's fixed.
-        getSlug() {
-            if (this._serverFlagName) return this._serverFlagName;
-            return document.getElementById('name')?.value?.trim() || '';
-        },
-
-        getBucket(subject) {
-            return getBucket(subject);
-        },
-
-        isInRollout(subject) {
-            return this.getBucket(subject) < this.value;
-        },
-
-        subjectsInBucket(b) {
-            return this.subjects.filter(s => this.getBucket(s) === b);
-        },
-
-        addTag() {
-            const val = this.tagInput.replace(/,\s*$/, '').trim();
-            if (val && !this.subjects.includes(val)) {
-                this.subjects.push(val);
-            }
-            this.tagInput = '';
-        },
-
-        removeSubject(i) {
-            this.subjects.splice(i, 1);
-        },
-
-        generateSamples() {
-            const samples = Array.from({ length: 20 }, (_, i) => `user-${i + 1}`);
-            samples.forEach(s => {
-                if (!this.subjects.includes(s)) this.subjects.push(s);
-            });
-        },
     };
 }
 </script>
