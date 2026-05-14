@@ -7,8 +7,6 @@ use App\Http\Controllers\Api\FlagEvaluationController;
 use App\Http\Controllers\Api\ReportPhotosController;
 use Illuminate\Support\Facades\Route;
 
-// All routes here are auto-prefixed with /api (Laravel default).
-
 Route::get('/', fn () => response()->json(['name' => 'Fixico API', 'status' => 'ok']));
 
 // Public client-facing flag evaluation
