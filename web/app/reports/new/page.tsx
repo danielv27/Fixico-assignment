@@ -25,7 +25,6 @@ export default function NewReportPage() {
         <p className="mt-0.5 text-sm text-zinc-500">Fill in the details of the damage for assessment.</p>
       </div>
 
-      {/* Conditional component #3 — rolling out to NL users (50 %) */}
       <div className="mb-5">
         <NewReportBanner />
       </div>

@@ -81,7 +81,6 @@ export default async function ReportDetailPage({ params }: Props) {
 
       <ReportForm action={action} initial={report} submitLabel="Save changes" />
 
-      {/* Conditional component #2 — photo attachments (25 % rollout) */}
       <div className="mt-8">
         <PhotoAttachments reportId={reportId} />
       </div>

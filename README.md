@@ -14,7 +14,7 @@ make fresh       # wipe volumes and rebuild
 | URL | What |
 |---|---|
 | http://localhost:3001 | Next.js damage-report client |
-| http://localhost:8000/admin/feature_flags | Laravel Blade admin |
+| http://localhost:8000/admin | Laravel Blade admin |
 | http://localhost:8000/api | JSON API |
 
 ## Architecture

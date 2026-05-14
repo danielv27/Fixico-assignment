@@ -30,7 +30,6 @@ export default async function Home() {
           </Link>
         </div>
 
-        {/* Conditional component #1 — bulk actions (admin only) */}
         {ids.length > 0 && (
           <div className="mt-4">
             <BulkActionsToolbar reportIds={ids} />
