@@ -156,38 +156,36 @@
 
             {{-- ─ Distribution preview ────────────────────────────────── --}}
             {{--
-                200 pre-computed subjects — exactly 2 per bucket — so the
-                grid is always perfectly even. At N% exactly N*2 of 200 users
-                are in rollout, making the percentage literal and unambiguous.
+                200 pre-computed subjects — exactly 2 per bucket — generated
+                once on init so CRC32 never runs at render time. At N% exactly
+                N*2 of 200 users are in rollout, making the percentage literal.
             --}}
-            <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4" x-init="buildSample()">
+
                 <div class="mb-3 flex items-center justify-between">
                     <span class="text-xs font-semibold text-zinc-700">Distribution preview</span>
                     <span class="text-xs text-zinc-400">200 evenly distributed users · 2 per bucket</span>
                 </div>
 
-                {{-- Grid: 100 buckets, each holding exactly 2 of the 200 users --}}
+                {{-- 10×10 bucket grid --}}
                 <div class="grid gap-0.5" style="grid-template-columns: repeat(10, 1fr)">
                     <template x-for="b in 100" :key="b">
-                        <div class="group relative flex h-8 cursor-default flex-col items-center justify-center rounded-sm transition-colors"
-                             :class="(b-1) < value
-                                 ? 'bg-emerald-500 text-white'
-                                 : 'bg-zinc-200 text-zinc-400'"
-                             :title="`Bucket ${b-1} — ${(b-1) < value ? '2 users in rollout' : 'excluded'}`">
+                        <div class="flex h-8 cursor-default flex-col items-center justify-center rounded-sm transition-colors"
+                             :class="(b-1) < value ? 'bg-emerald-500 text-white' : 'bg-zinc-200 text-zinc-400'"
+                             :title="`Bucket ${b-1} — ${(b-1) < value ? 'in rollout' : 'excluded'}`">
                             <span class="text-[8px] font-medium leading-none opacity-60" x-text="b-1"></span>
-                            {{-- Two user dots --}}
                             <div class="mt-0.5 flex gap-0.5">
                                 <span class="h-1 w-1 rounded-full"
-                                      :class="(b-1) < value ? 'bg-white/70' : 'bg-zinc-400/50'"></span>
+                                      :class="(b-1) < value ? 'bg-white/70' : 'bg-zinc-400/40'"></span>
                                 <span class="h-1 w-1 rounded-full"
-                                      :class="(b-1) < value ? 'bg-white/70' : 'bg-zinc-400/50'"></span>
+                                      :class="(b-1) < value ? 'bg-white/70' : 'bg-zinc-400/40'"></span>
                             </div>
                         </div>
                     </template>
                 </div>
 
-                {{-- Summary --}}
-                <div class="mt-3 flex items-center justify-between">
+                {{-- Summary row --}}
+                <div class="mt-3 mb-3 flex items-center justify-between border-b border-zinc-200 pb-3">
                     <div class="flex items-center gap-3 text-xs text-zinc-500">
                         <span class="flex items-center gap-1.5">
                             <span class="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500"></span>
@@ -200,9 +198,40 @@
                     </div>
                     <p class="text-xs font-medium text-zinc-700">
                         <span class="text-emerald-700" x-text="value * 2"></span>
-                        <span class="font-normal text-zinc-500"> of 200 users · exactly </span>
+                        <span class="font-normal text-zinc-400"> of 200 users &mdash; exactly </span>
                         <span class="text-emerald-700" x-text="`${value}%`"></span>
                     </p>
+                </div>
+
+                {{-- Scrollable user list --}}
+                <div class="max-h-56 overflow-y-auto rounded-lg border border-zinc-200 bg-white">
+                    <table class="w-full text-xs">
+                        <thead class="sticky top-0 bg-zinc-50 shadow-sm">
+                            <tr class="border-b border-zinc-100">
+                                <th class="px-3 py-2 text-left font-semibold text-zinc-500">User</th>
+                                <th class="px-3 py-2 text-center font-semibold text-zinc-500">Bucket</th>
+                                <th class="px-3 py-2 text-left font-semibold text-zinc-500">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-50">
+                            <template x-for="u in sample" :key="u.name">
+                                <tr :class="u.bucket < value ? 'bg-emerald-50/40' : ''">
+                                    <td class="px-3 py-1.5 font-mono font-medium text-zinc-700" x-text="u.name"></td>
+                                    <td class="px-3 py-1.5 text-center tabular-nums text-zinc-500" x-text="u.bucket"></td>
+                                    <td class="px-3 py-1.5">
+                                        <span class="inline-flex items-center gap-1 font-medium"
+                                              :class="u.bucket < value ? 'text-emerald-700' : 'text-zinc-400'">
+                                            <svg class="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path x-show="u.bucket < value"  stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                <path x-show="u.bucket >= value" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                            <span x-text="u.bucket < value ? 'In rollout' : 'Excluded'"></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -287,12 +316,50 @@ function rulesBuilder(initial) {
 }
 
 // ---------------------------------------------------------------------------
-// Percentage slider
+// CRC32 — PHP-compatible, used once to pre-generate the even sample.
+// ---------------------------------------------------------------------------
+const _t32 = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        t[i] = c;
+    }
+    return t;
+})();
+
+function _crc32(str) {
+    const bytes = new TextEncoder().encode(str);
+    let crc = 0xFFFFFFFF;
+    for (const b of bytes) crc = _t32[(crc ^ b) & 0xFF] ^ (crc >>> 8);
+    const u = (crc ^ 0xFFFFFFFF) >>> 0;
+    return u > 0x7FFFFFFF ? u - 0x100000000 : u;
+}
+
+// ---------------------------------------------------------------------------
+// Percentage slider + pre-computed even user sample
 // ---------------------------------------------------------------------------
 function percentageSlider(initial) {
     return {
         enabled: initial !== null,
         value: initial ?? 100,
+        sample: [],   // [{name, bucket}] — 200 items, exactly 2 per bucket
+
+        buildSample() {
+            const items = [];
+            const counts = new Array(100).fill(0);
+            let i = 0;
+            while (items.length < 200) {
+                const name = `user-${i++}`;
+                const b = Math.abs(_crc32(name)) % 100;
+                if (counts[b] < 2) {
+                    counts[b]++;
+                    items.push({ name, bucket: b });
+                }
+            }
+            // Sort by bucket so in-rollout rows cluster at the top as you drag
+            this.sample = items.sort((a, b) => a.bucket - b.bucket);
+        },
     };
 }
 </script>
