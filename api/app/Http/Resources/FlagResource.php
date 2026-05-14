@@ -14,6 +14,10 @@ class FlagResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'enabled' => $this->enabled,
+            'attribute_rules' => $this->attribute_rules ?? [],
+            'rollout_percentage' => $this->rollout_percentage,
+            'starts_at' => $this->starts_at?->toIso8601String(),
+            'ends_at' => $this->ends_at?->toIso8601String(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

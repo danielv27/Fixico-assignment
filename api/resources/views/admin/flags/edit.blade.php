@@ -29,9 +29,54 @@
             <span class="text-sm font-medium">Enabled</span>
         </label>
 
+        <div class="flex flex-col gap-1">
+            <label for="attribute_rules" class="text-sm font-medium">
+                Attribute rules
+                <span class="font-normal text-zinc-500">(JSON · allowed attributes: country, role)</span>
+            </label>
+            <textarea id="attribute_rules" name="attribute_rules" rows="3"
+                      class="rounded border border-zinc-300 bg-white px-3 py-2 font-mono text-sm">{{ old('attribute_rules', json_encode($flag->attribute_rules ?? [])) }}</textarea>
+            @error('attribute_rules.*')
+                <p class="text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="rollout_percentage" class="text-sm font-medium">
+                Rollout percentage
+                <span class="font-normal text-zinc-500">(0–100 · blank = 100 %)</span>
+            </label>
+            <input id="rollout_percentage" name="rollout_percentage" type="number" min="0" max="100"
+                   value="{{ old('rollout_percentage', $flag->rollout_percentage) }}"
+                   class="w-32 rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('rollout_percentage') border-red-400 @enderror">
+            @error('rollout_percentage')
+                <p class="text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+                <label for="starts_at" class="text-sm font-medium">Activates at</label>
+                <input id="starts_at" name="starts_at" type="datetime-local"
+                       value="{{ old('starts_at', $flag->starts_at?->format('Y-m-d\TH:i')) }}"
+                       class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('starts_at') border-red-400 @enderror">
+                @error('starts_at')
+                    <p class="text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="ends_at" class="text-sm font-medium">Expires at</label>
+                <input id="ends_at" name="ends_at" type="datetime-local"
+                       value="{{ old('ends_at', $flag->ends_at?->format('Y-m-d\TH:i')) }}"
+                       class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('ends_at') border-red-400 @enderror">
+                @error('ends_at')
+                    <p class="text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
         <div>
-            <button type="submit"
-                    class="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+            <button type="submit" class="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
                 Save changes
             </button>
         </div>
