@@ -185,7 +185,7 @@ it('updates description and enabled state', function (): void {
         'description' => 'New description',
         'enabled' => '0',
         'attribute_rules' => '[]',
-    ])->assertRedirect(route('admin.flags.edit', $flag));
+    ])->assertRedirect(route('admin.flags.index'));
 
     $flag->refresh();
     expect($flag->description)->toBe('New description')

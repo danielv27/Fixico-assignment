@@ -12,7 +12,17 @@
             Flags
         </a>
         <span class="text-zinc-300">/</span>
-        <h1 class="font-mono text-xl font-semibold tracking-tight">{{ $flag->name }}</h1>
+        @php
+            $nameParts = explode('.', $flag->name, 2);
+            $namespace = count($nameParts) > 1 ? $nameParts[0] : null;
+            $label = ucwords(str_replace('_', ' ', end($nameParts)));
+        @endphp
+        <div class="flex items-baseline gap-2">
+            <h1 class="text-xl font-bold tracking-tight text-zinc-900">{{ $label }}</h1>
+            @if ($namespace)
+                <span class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs font-medium text-zinc-400">{{ $namespace }}</span>
+            @endif
+        </div>
     </div>
 
     {{--

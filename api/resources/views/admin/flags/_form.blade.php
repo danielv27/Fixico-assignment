@@ -125,9 +125,12 @@
         <div class="flex items-start justify-between">
             <div>
                 <h2 class="text-sm font-semibold text-zinc-800">Rollout percentage</h2>
-                <p class="mt-0.5 text-xs text-zinc-500">Fraction of eligible users who see this feature. Bucketing is stable per user.</p>
+                <p class="mt-0.5 text-xs text-zinc-500">
+                    Fraction of eligible users who see this feature. Bucketing is deterministic — the same user always lands in the same bucket.
+                    Enable to set a limit and <span class="font-medium text-zinc-600">simulate which users are included</span>.
+                </p>
             </div>
-            <label class="inline-flex cursor-pointer items-center gap-2 text-xs text-zinc-600">
+            <label class="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-zinc-600">
                 <input type="checkbox" x-model="enabled" class="h-3.5 w-3.5 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
                 Limit rollout
             </label>
