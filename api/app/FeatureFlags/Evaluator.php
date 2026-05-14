@@ -91,11 +91,16 @@ final readonly class Evaluator
     }
 
     /**
-     * Stable per-subject, per-flag bucket via CRC32.
+     * Stable per-subject bucket via CRC32 on the subject alone.
      *
-     * Including the flag name prevents the same subject always landing in the
-     * same bucket across every flag — otherwise a 10 % rollout always hits or
-     * always misses the same users for every flag.
+     * Intentionally does NOT include the flag name in the hash. This means
+     * a subject's bucket (0–99) is fixed across all flags — "user-42 is
+     * always in bucket 17". A 25 % rollout reliably catches the same cohort
+     * of early adopters regardless of which flag you're rolling out, which
+     * is both more intuitive and more useful for product rollouts. The
+     * trade-off (flags are correlated, not independent) is acceptable for
+     * feature toggles; it would matter for rigorous A/B experiments, which
+     * this service is not designed for.
      */
     private function withinPercentage(FeatureFlag $flag, string $subject): bool
     {
@@ -103,7 +108,7 @@ final readonly class Evaluator
             return true;
         }
 
-        $bucket = abs(crc32($subject.':'.$flag->name)) % 100;
+        $bucket = abs(crc32($subject)) % 100;
 
         return $bucket < $flag->rollout_percentage;
     }

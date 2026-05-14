@@ -375,8 +375,8 @@ function phpCrc32(str) {
     return unsigned > 0x7FFFFFFF ? unsigned - 0x100000000 : unsigned;
 }
 
-function getBucket(subject, flagName) {
-    return Math.abs(phpCrc32(subject + ':' + flagName)) % 100;
+function getBucket(subject) {
+    return Math.abs(phpCrc32(subject)) % 100;
 }
 
 // ---------------------------------------------------------------------------
@@ -399,7 +399,7 @@ function percentageSlider(initial, serverFlagName) {
         },
 
         getBucket(subject) {
-            return getBucket(subject, this.getSlug());
+            return getBucket(subject);
         },
 
         isInRollout(subject) {

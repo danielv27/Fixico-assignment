@@ -199,7 +199,7 @@ it('is deterministic — same subject+flag always lands in the same bucket', fun
     }
 });
 
-it('decorrelates buckets across flags — same subject can get different decisions', function (): void {
+it('gives the same subject the same bucket across all flags (user-consistent bucketing)', function (): void {
     $ctx = new EvaluationContext(subject: 'user-999');
     $results = [];
 
@@ -208,8 +208,9 @@ it('decorrelates buckets across flags — same subject can get different decisio
         $results[] = $this->evaluator->evaluate($flag, $ctx);
     }
 
-    // At least two different outcomes among five flags — extremely unlikely to fail unless something is wrong
-    expect(count(array_unique($results)))->toBeGreaterThan(1);
+    // Bucket is based on subject only — a user is either in or out for ALL
+    // flags at the same percentage threshold. All five should be identical.
+    expect(count(array_unique($results)))->toBe(1);
 });
 
 it('distributes roughly correctly over many subjects at 50 %', function (): void {
