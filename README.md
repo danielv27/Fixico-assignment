@@ -83,7 +83,7 @@ Flags are cached in Redis under a single key (`flags:index:v2`) with a configura
 
 ```bash
 make test                                                # API test suite (51 tests)
-docker compose exec api vendor/bin/pint --dirty         # PHP code style
+docker compose exec api vendor/bin/pint --dirty          # PHP code style
 docker compose exec web npm run lint                     # Next.js lint
 docker compose exec web npm run build                    # Next.js prod build
 ```

@@ -9,43 +9,54 @@ import { ViewerSwitcher } from "@/components/ViewerSwitcher";
 import { SubjectInitialiser } from "@/components/SubjectInitialiser";
 
 export const metadata: Metadata = {
-  title: "Fixico Damage Reports",
+  title: "Fixico · Damage Reports",
   description: "Manage car damage reports.",
 };
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const jar = await cookies();
-  // Stable per-browser UUID for percentage-rollout stickiness.
-  // On the very first request the cookie isn't set yet; SubjectInitialiser
-  // sets it client-side and subsequent requests use it.
   const subject = jar.get("fixico_subject")?.value ?? "anonymous";
-
   const profile = await getViewerProfile();
   const flags = await evaluateFlags({ subject, attributes: profile });
 
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className="h-full">
+      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         <SubjectInitialiser />
         <FlagsProvider flags={flags}>
-          <nav className="border-b border-zinc-200 bg-white px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-            <div className="mx-auto flex max-w-3xl items-center justify-between gap-6 text-sm font-medium">
-              <div className="flex items-center gap-6">
-                <Link href="/" className="text-zinc-900 hover:text-emerald-600 dark:text-zinc-100">
+          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
+            <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className="rounded-md px-3 py-1.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                >
+                  Fixico
+                </Link>
+                <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                <Link
+                  href="/"
+                  className="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                >
                   Reports
                 </Link>
-                <a href="http://localhost:8000/admin/flags" className="text-zinc-500 hover:text-emerald-600 dark:text-zinc-400">
-                  Admin · Flags ↗
+                <a
+                  href="http://localhost:8000/admin/flags"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                >
+                  Flags ↗
                 </a>
-              </div>
+              </nav>
               <ViewerSwitcher profile={profile} />
             </div>
-          </nav>
-          {children}
+          </header>
+          <div className="flex flex-1 flex-col">
+            {children}
+          </div>
         </FlagsProvider>
       </body>
     </html>

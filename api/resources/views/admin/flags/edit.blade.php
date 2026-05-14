@@ -3,94 +3,55 @@
 @section('title', $flag->name)
 
 @section('content')
-    <div class="flex items-center gap-4">
-        <a href="{{ route('admin.flags.index') }}" class="text-sm text-zinc-500 hover:text-zinc-900">← Flags</a>
-        <h1 class="truncate font-mono text-3xl font-semibold tracking-tight">{{ $flag->name }}</h1>
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{{ route('admin.flags.index') }}"
+           class="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Flags
+        </a>
+        <span class="text-zinc-300">/</span>
+        <h1 class="font-mono text-xl font-semibold tracking-tight">{{ $flag->name }}</h1>
     </div>
 
-    <form method="POST" action="{{ route('admin.flags.update', $flag) }}" class="mt-6 flex flex-col gap-4">
+    <form method="POST" action="{{ route('admin.flags.update', $flag) }}">
         @csrf
         @method('PATCH')
 
-        <div class="flex flex-col gap-1">
-            <label for="description" class="text-sm font-medium">Description</label>
-            <textarea id="description" name="description" rows="2"
-                      class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm">{{ old('description', $flag->description) }}</textarea>
-            @error('description')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
+        @include('admin.flags._form', [
+            'rulesJson'   => old('attribute_rules', json_encode($flag->attribute_rules ?? [])),
+            'pct'         => old('rollout_percentage', $flag->rollout_percentage),
+            'startsAt'    => old('starts_at', $flag->starts_at?->format('Y-m-d\TH:i')),
+            'endsAt'      => old('ends_at', $flag->ends_at?->format('Y-m-d\TH:i')),
+            'description' => old('description', $flag->description),
+            'enabled'     => old('enabled', $flag->enabled),
+        ])
 
-        <input type="hidden" name="enabled" value="0">
-        <label class="flex cursor-pointer items-center gap-3">
-            <input type="checkbox" name="enabled" value="1"
-                   {{ old('enabled', $flag->enabled) ? 'checked' : '' }}
-                   class="h-4 w-4 rounded border-zinc-300">
-            <span class="text-sm font-medium">Enabled</span>
-        </label>
+        <div class="mt-6 flex items-center justify-between">
+            <form method="POST" action="{{ route('admin.flags.destroy', $flag) }}" class="m-0 p-0">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        onclick="return confirm('Permanently delete {{ $flag->name }}? This cannot be undone.')"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3.5 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete flag
+                </button>
+            </form>
 
-        <div class="flex flex-col gap-1">
-            <label for="attribute_rules" class="text-sm font-medium">
-                Attribute rules
-                <span class="font-normal text-zinc-500">(JSON · allowed attributes: country, role)</span>
-            </label>
-            <textarea id="attribute_rules" name="attribute_rules" rows="3"
-                      class="rounded border border-zinc-300 bg-white px-3 py-2 font-mono text-sm">{{ old('attribute_rules', json_encode($flag->attribute_rules ?? [])) }}</textarea>
-            @error('attribute_rules.*')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="flex flex-col gap-1">
-            <label for="rollout_percentage" class="text-sm font-medium">
-                Rollout percentage
-                <span class="font-normal text-zinc-500">(0–100 · blank = 100 %)</span>
-            </label>
-            <input id="rollout_percentage" name="rollout_percentage" type="number" min="0" max="100"
-                   value="{{ old('rollout_percentage', $flag->rollout_percentage) }}"
-                   class="w-32 rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('rollout_percentage') border-red-400 @enderror">
-            @error('rollout_percentage')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col gap-1">
-                <label for="starts_at" class="text-sm font-medium">Activates at</label>
-                <input id="starts_at" name="starts_at" type="datetime-local"
-                       value="{{ old('starts_at', $flag->starts_at?->format('Y-m-d\TH:i')) }}"
-                       class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('starts_at') border-red-400 @enderror">
-                @error('starts_at')
-                    <p class="text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="flex flex-col gap-1">
-                <label for="ends_at" class="text-sm font-medium">Expires at</label>
-                <input id="ends_at" name="ends_at" type="datetime-local"
-                       value="{{ old('ends_at', $flag->ends_at?->format('Y-m-d\TH:i')) }}"
-                       class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm @error('ends_at') border-red-400 @enderror">
-                @error('ends_at')
-                    <p class="text-sm text-red-600">{{ $message }}</p>
-                @enderror
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.flags.index') }}"
+                   class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors">
+                    Save changes
+                </button>
             </div>
         </div>
-
-        <div>
-            <button type="submit" class="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
-                Save changes
-            </button>
-        </div>
-    </form>
-
-    <hr class="my-8 border-zinc-200">
-
-    <form method="POST" action="{{ route('admin.flags.destroy', $flag) }}">
-        @csrf
-        @method('DELETE')
-        <button type="submit"
-                onclick="return confirm('Delete {{ $flag->name }}?')"
-                class="rounded border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
-            Delete flag
-        </button>
     </form>
 @endsection
