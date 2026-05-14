@@ -7,45 +7,60 @@ import { evaluateFlags } from "@/lib/flags/server";
 import { getViewerProfile } from "@/lib/viewer/profile";
 import { ViewerSwitcher } from "@/components/ViewerSwitcher";
 import { SubjectInitialiser } from "@/components/SubjectInitialiser";
+import { DemoBanner } from "@/components/DemoBanner";
 
 export const metadata: Metadata = {
-  title: "Fixico Damage Reports",
+  title: "Fixico · Damage Reports",
   description: "Manage car damage reports.",
 };
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const jar = await cookies();
-  // Stable per-browser UUID for percentage-rollout stickiness.
-  // On the very first request the cookie isn't set yet; SubjectInitialiser
-  // sets it client-side and subsequent requests use it.
   const subject = jar.get("fixico_subject")?.value ?? "anonymous";
-
   const profile = await getViewerProfile();
   const flags = await evaluateFlags({ subject, attributes: profile });
 
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className="h-full">
+      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         <SubjectInitialiser />
         <FlagsProvider flags={flags}>
-          <nav className="border-b border-zinc-200 bg-white px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-            <div className="mx-auto flex max-w-3xl items-center justify-between gap-6 text-sm font-medium">
-              <div className="flex items-center gap-6">
-                <Link href="/" className="text-zinc-900 hover:text-emerald-600 dark:text-zinc-100">
-                  Reports
+
+          {/* Demo banner sits above everything — including the nav */}
+          <DemoBanner />
+
+          {/* Brand accent line */}
+          <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+
+          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+            <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
+              <div className="flex items-center gap-5">
+                <Link href="/" className="group flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 shadow-sm transition-transform group-hover:scale-105">
+                    <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
-                <a href="http://localhost:8000/admin/flags" className="text-zinc-500 hover:text-emerald-600 dark:text-zinc-400">
-                  Admin · Flags ↗
+                <a
+                  href="http://localhost:8000/admin/flags"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                >
+                  Admin ↗
                 </a>
               </div>
               <ViewerSwitcher profile={profile} />
             </div>
-          </nav>
-          {children}
+          </header>
+
+          <div className="flex flex-1 flex-col">
+            {children}
+          </div>
         </FlagsProvider>
       </body>
     </html>

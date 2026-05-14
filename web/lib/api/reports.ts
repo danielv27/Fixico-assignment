@@ -1,6 +1,6 @@
 import "server-only";
 
-const apiBaseUrl = process.env.INTERNAL_API_BASE_URL ?? "http://api:8000";
+const apiBaseUrl = process.env.INTERNAL_API_BASE_URL ?? "http://localhost:8000";
 
 export type ReportStatus = "draft" | "submitted" | "approved";
 

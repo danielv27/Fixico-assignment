@@ -1,15 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import { useFlag } from "@/lib/flags/context";
 
 export function DemoBanner() {
   const enabled = useFlag("demo.banner");
-  if (!enabled) return null;
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!enabled || dismissed) return null;
 
   return (
-    <div className="border-b border-emerald-200 bg-emerald-50 px-6 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950 dark:text-emerald-100">
-      Slice 1 sanity check — this banner is gated by the{" "}
-      <code className="font-mono">demo.banner</code> flag.
+    <div className="flex items-center justify-between gap-4 border-b border-emerald-100 bg-emerald-50 px-6 py-2 dark:border-emerald-900/30 dark:bg-emerald-950/40">
+      <p className="flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+        </span>
+        Feature flag service is active. Manage flags at{" "}
+        <a
+          href="http://localhost:8000/admin/flags"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold underline underline-offset-2 hover:text-emerald-900 dark:hover:text-emerald-100"
+        >
+          localhost:8000/admin/flags ↗
+        </a>
+      </p>
+      <button
+        onClick={() => setDismissed(true)}
+        className="flex-shrink-0 text-emerald-400 hover:text-emerald-700 transition-colors"
+        aria-label="Dismiss"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   );
 }
