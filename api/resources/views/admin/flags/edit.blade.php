@@ -34,6 +34,7 @@
             'endsAt'      => old('ends_at', $flag->ends_at?->format('Y-m-d\TH:i')),
             'description' => old('description', $flag->description),
             'enabled'     => old('enabled', $flag->enabled),
+            'flagName'    => $flag->name,
         ])
     </form>
 

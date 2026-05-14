@@ -40,6 +40,7 @@
             'endsAt'      => old('ends_at', ''),
             'description' => old('description', ''),
             'enabled'     => old('enabled', false),
+            'flagName'    => null,  // read from name input live in JS
         ])
 
         <div class="mt-6 flex items-center justify-end gap-3">

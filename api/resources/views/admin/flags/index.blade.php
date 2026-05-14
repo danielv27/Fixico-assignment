@@ -38,6 +38,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">Targeting</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">Rollout</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">Enabled</th>
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -47,29 +48,34 @@
                             $now = now();
                             if (!$flag->enabled) {
                                 $statusLabel = 'Disabled';
-                                $statusClass = 'bg-zinc-100 text-zinc-500';
+                                $statusClass = 'bg-zinc-100 text-zinc-500 ring-zinc-200/80';
                                 $dotClass = 'bg-zinc-400';
                             } elseif ($flag->starts_at && $now->isBefore($flag->starts_at)) {
-                                $statusLabel = 'Scheduled';
-                                $statusClass = 'bg-blue-50 text-blue-700';
+                                $statusLabel = 'Scheduled · ' . $flag->starts_at->format('M j');
+                                $statusClass = 'bg-blue-50 text-blue-700 ring-blue-200/80';
                                 $dotClass = 'bg-blue-400';
                             } elseif ($flag->ends_at && $now->isAfter($flag->ends_at)) {
-                                $statusLabel = 'Expired';
-                                $statusClass = 'bg-red-50 text-red-600';
+                                $statusLabel = 'Expired · ' . $flag->ends_at->format('M j');
+                                $statusClass = 'bg-red-50 text-red-600 ring-red-200/80';
                                 $dotClass = 'bg-red-400';
+                            } elseif ($flag->ends_at) {
+                                $statusLabel = 'Active · ends ' . $flag->ends_at->format('M j');
+                                $statusClass = 'bg-emerald-50 text-emerald-700 ring-emerald-200/80';
+                                $dotClass = 'bg-emerald-500';
                             } else {
                                 $statusLabel = 'Active';
-                                $statusClass = 'bg-emerald-50 text-emerald-700';
+                                $statusClass = 'bg-emerald-50 text-emerald-700 ring-emerald-200/80';
                                 $dotClass = 'bg-emerald-500';
                             }
                         @endphp
-                        <tr class="hover:bg-zinc-50 transition-colors">
+                        <tr class="hover:bg-zinc-50/70 transition-colors">
                             <td class="px-4 py-3.5">
                                 <div class="font-mono text-sm font-medium text-zinc-900">{{ $flag->name }}</div>
                                 @if ($flag->description)
                                     <div class="mt-0.5 text-xs text-zinc-500 max-w-xs truncate">{{ $flag->description }}</div>
                                 @endif
                             </td>
+
                             <td class="px-4 py-3.5">
                                 @if (!empty($flag->attribute_rules))
                                     <div class="flex flex-wrap gap-1">
@@ -83,10 +89,11 @@
                                     <span class="text-xs text-zinc-400">All users</span>
                                 @endif
                             </td>
+
                             <td class="px-4 py-3.5">
                                 @if ($flag->rollout_percentage !== null)
                                     <div class="flex items-center gap-2">
-                                        <div class="w-20 h-1.5 rounded-full bg-zinc-200 overflow-hidden">
+                                        <div class="w-16 h-1.5 rounded-full bg-zinc-200 overflow-hidden">
                                             <div class="h-full rounded-full bg-emerald-500" style="width: {{ $flag->rollout_percentage }}%"></div>
                                         </div>
                                         <span class="text-xs font-medium text-zinc-700">{{ $flag->rollout_percentage }}%</span>
@@ -95,19 +102,29 @@
                                     <span class="text-xs text-zinc-400">100%</span>
                                 @endif
                             </td>
+
                             <td class="px-4 py-3.5">
-                                <span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $statusClass }}">
-                                    <span class="h-1.5 w-1.5 rounded-full {{ $dotClass }}"></span>
+                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $statusClass }}">
+                                    <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full {{ $dotClass }}"></span>
                                     {{ $statusLabel }}
                                 </span>
-                                @if ($flag->starts_at && $now->isBefore($flag->starts_at))
-                                    <div class="mt-1 text-xs text-zinc-400">from {{ $flag->starts_at->format('M j, H:i') }}</div>
-                                @elseif ($flag->ends_at && $now->isAfter($flag->ends_at))
-                                    <div class="mt-1 text-xs text-zinc-400">ended {{ $flag->ends_at->format('M j, H:i') }}</div>
-                                @elseif ($flag->ends_at)
-                                    <div class="mt-1 text-xs text-zinc-400">until {{ $flag->ends_at->format('M j, H:i') }}</div>
-                                @endif
                             </td>
+
+                            {{-- Inline enable/disable toggle --}}
+                            <td class="px-4 py-3.5"
+                                x-data="inlineToggle({{ $flag->id }}, {{ $flag->enabled ? 'true' : 'false' }})">
+                                <button type="button"
+                                        @click="toggle()"
+                                        :disabled="loading"
+                                        :aria-label="enabled ? 'Disable flag' : 'Enable flag'"
+                                        class="relative flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 disabled:cursor-wait disabled:opacity-60"
+                                        :class="enabled ? 'bg-emerald-500' : 'bg-zinc-300'">
+                                    <span class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
+                                          :class="enabled ? 'translate-x-4' : 'translate-x-0'">
+                                    </span>
+                                </button>
+                            </td>
+
                             <td class="px-4 py-3.5 text-right">
                                 <a href="{{ route('admin.flags.edit', $flag) }}"
                                    class="inline-flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
@@ -123,4 +140,33 @@
             </table>
         </div>
     @endif
+
+<script>
+function inlineToggle(id, initial) {
+    return {
+        enabled: initial,
+        loading: false,
+
+        async toggle() {
+            this.loading = true;
+            try {
+                const res = await fetch(`/api/admin/flags/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ enabled: !this.enabled }),
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    this.enabled = json.data.enabled;
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
+    };
+}
+</script>
 @endsection
