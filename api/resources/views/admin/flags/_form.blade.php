@@ -184,20 +184,8 @@
             <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4" x-init="buildSample()">
 
                 <div class="mb-3 flex items-center justify-between">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-semibold text-zinc-700">Distribution preview</span>
-                        {{-- Tooltip: clarifies this is a demo illustration --}}
-                        <div class="group relative">
-                            <svg class="h-3.5 w-3.5 cursor-default text-zinc-400 hover:text-zinc-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                            </svg>
-                            <div class="pointer-events-none absolute left-0 top-5 z-50 w-72 rounded-lg border border-zinc-200 bg-white p-3 text-xs leading-relaxed text-zinc-600 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                                <p class="font-semibold text-zinc-800">Illustration only</p>
-                                <p class="mt-1">These 200 users are synthetically generated with exactly 2 per bucket to demonstrate how percentage rollouts distribute evenly. In production, subjects are real user identifiers — UUIDs, emails, etc. — which naturally distribute the same way across buckets.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <span class="text-xs text-zinc-400">200 demo users · 2 per bucket</span>
+                    <span class="text-xs font-semibold text-zinc-700">Distribution preview</span>
+                    <span class="text-xs text-zinc-400">2 per bucket · 200 total</span>
                 </div>
 
                 {{-- 10×10 bucket grid --}}
@@ -265,6 +253,18 @@
                             </template>
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Always-visible note — makes clear this is synthetic demo data --}}
+                <div class="mt-3 flex items-start gap-2.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-3">
+                    <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-xs leading-relaxed text-blue-800">
+                        <span class="font-semibold">Illustration only.</span>
+                        These 200 users are synthetically generated — exactly 2 per bucket — to show how percentage rollouts distribute evenly across your user base.
+                        In production, subjects are real user identifiers (UUIDs, emails, etc.) which distribute the same way naturally.
+                    </div>
                 </div>
             </div>
         </div>
