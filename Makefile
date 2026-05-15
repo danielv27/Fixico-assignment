@@ -24,6 +24,7 @@ seed: ## Seed databases (FeatureFlag API + Web app damage reports)
 
 bootstrap: ## Build and start the stack; containers migrate and seed themselves
 	docker compose up --build -d
+	$(MAKE) seed
 
 fresh: ## Rebuild from scratch with empty volumes
 	docker compose down -v
