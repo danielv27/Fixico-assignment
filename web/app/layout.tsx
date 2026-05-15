@@ -5,6 +5,7 @@ import "./globals.css";
 import { FlagsProvider } from "@/lib/flags/context";
 import { evaluateFlags } from "@/lib/flags/server";
 import { getViewerProfile } from "@/lib/viewer/profile";
+import { SUBJECT_COOKIE } from "@/lib/viewer/constants";
 import { ViewerSwitcher } from "@/components/ViewerSwitcher";
 import { SubjectInitialiser } from "@/components/SubjectInitialiser";
 import { DemoBanner } from "@/components/DemoBanner";
@@ -18,7 +19,7 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const jar = await cookies();
-  const subject = jar.get("fixico_subject")?.value ?? "anonymous";
+  const subject = jar.get(SUBJECT_COOKIE)?.value ?? "anonymous";
   const profile = await getViewerProfile();
   const flags = await evaluateFlags({ subject, attributes: profile });
 

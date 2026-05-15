@@ -30,7 +30,7 @@ export class ReportValidationError extends Error {
   }
 }
 
-const ALLOWED_STATUSES: ReportStatus[] = ["draft", "submitted", "approved"];
+export const ALLOWED_STATUSES: ReportStatus[] = ["draft", "submitted", "approved"];
 
 function validate(input: ReportInput): ValidationErrors | null {
   const errors: ValidationErrors = {};
@@ -67,14 +67,14 @@ function mapRow(r: Row): DamageReport {
   };
 }
 
-export async function listReports(): Promise<DamageReport[]> {
+export function listReports(): DamageReport[] {
   const rows = db
     .prepare("SELECT * FROM damage_reports ORDER BY created_at DESC")
     .all() as Row[];
   return rows.map(mapRow);
 }
 
-export async function getReport(id: number): Promise<DamageReport> {
+export function getReport(id: number): DamageReport {
   const row = db
     .prepare("SELECT * FROM damage_reports WHERE id = ?")
     .get(id) as Row | undefined;
@@ -82,7 +82,7 @@ export async function getReport(id: number): Promise<DamageReport> {
   return mapRow(row);
 }
 
-export async function createReport(input: ReportInput): Promise<DamageReport> {
+export function createReport(input: ReportInput): DamageReport {
   const errors = validate(input);
   if (errors) throw new ReportValidationError(errors);
   const status =
@@ -102,11 +102,8 @@ export async function createReport(input: ReportInput): Promise<DamageReport> {
   return getReport(result.lastInsertRowid as number);
 }
 
-export async function updateReport(
-  id: number,
-  input: Partial<ReportInput>,
-): Promise<DamageReport> {
-  const current = await getReport(id);
+export function updateReport(id: number, input: Partial<ReportInput>): DamageReport {
+  const current = getReport(id);
   const merged: ReportInput = {
     vehicle_make: input.vehicle_make ?? current.vehicle_make,
     vehicle_model: input.vehicle_model ?? current.vehicle_model,
@@ -134,7 +131,7 @@ export async function updateReport(
   return getReport(id);
 }
 
-export async function bulkDeleteReports(ids: number[]): Promise<number> {
+export function bulkDeleteReports(ids: number[]): number {
   if (ids.length === 0) return 0;
   const placeholders = ids.map(() => "?").join(", ");
   const result = db

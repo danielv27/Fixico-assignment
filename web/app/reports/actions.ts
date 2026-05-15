@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import db from "@/lib/db";
 import {
+  ALLOWED_STATUSES,
   bulkDeleteReports,
   createReport,
   ReportValidationError,
@@ -16,8 +18,6 @@ export type FormState = {
   errors?: ValidationErrors;
   message?: string;
 };
-
-const ALLOWED_STATUSES: ReportStatus[] = ["draft", "submitted", "approved"];
 
 function parseInput(formData: FormData): ReportInput {
   const status = formData.get("status")?.toString();
@@ -37,7 +37,7 @@ export async function createReportAction(
   formData: FormData,
 ): Promise<FormState> {
   try {
-    const report = await createReport(parseInput(formData));
+    const report = createReport(parseInput(formData));
     revalidatePath("/");
     redirect(`/reports/${report.id}`);
   } catch (error) {
@@ -54,7 +54,7 @@ export async function updateReportAction(
   formData: FormData,
 ): Promise<FormState> {
   try {
-    await updateReport(id, parseInput(formData));
+    updateReport(id, parseInput(formData));
     revalidatePath("/");
     revalidatePath(`/reports/${id}`);
     return { message: "Saved." };
@@ -66,19 +66,13 @@ export async function updateReportAction(
   }
 }
 
-export async function bulkDeleteAction(
-  ids: number[],
-): Promise<{ deleted: number }> {
-  const deleted = await bulkDeleteReports(ids);
+export async function bulkDeleteAction(ids: number[]): Promise<{ deleted: number }> {
+  const deleted = bulkDeleteReports(ids);
   revalidatePath("/");
   return { deleted };
 }
 
-export async function savePhotosAction(
-  reportId: number,
-  urls: string[],
-): Promise<void> {
-  const db = (await import("@/lib/db")).default;
+export async function savePhotosAction(reportId: number, urls: string[]): Promise<void> {
   db.prepare(
     "UPDATE damage_reports SET photos = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?",
   ).run(JSON.stringify(urls), reportId);

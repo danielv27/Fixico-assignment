@@ -14,7 +14,7 @@ export default function NewReportPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
+          className="inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-800"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
