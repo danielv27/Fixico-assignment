@@ -60,11 +60,27 @@ The client has no real auth. A pill in the nav lets you switch country and role 
 |---|---|---|
 | `demo.banner` | Everyone | Simple on/off |
 | `reports.bulk_actions` | `role = admin` | Admin-only feature |
-| `report.new_form_layout` | `country = NL`, 50% | Gradual rollout to NL |
+| `form.description_first` | `country = NL`, 50% | Gradual rollout to NL |
 | `reports.photo_attachments` | Everyone, 25% | Beta feature |
 | `reports.ai_damage_estimate` | `plan = premium` | Attribute targeting |
 | `dashboard.v2` | Everyone, 20% | Scheduled — starts next week |
 | `promo.winter_2024` | Everyone | Expired — Dec 2024 campaign |
+
+## Conditionally rendered components
+
+| Flag | Component | Condition | Effect |
+|---|---|---|---|
+| `demo.banner` | `DemoBanner` | On for everyone | Dismissable banner linking to the flag admin |
+| `reports.bulk_actions` | `BulkActionsToolbar` | `role = admin` | Bulk-delete toolbar on the reports list |
+| `form.description_first` | `ReportFormView` | `country = NL`, 50% rollout | Reorders the new and edit report forms to show damage description first |
+| `reports.photo_attachments` | `PhotoAttachments` | Everyone, 25% rollout | Photo documentation section on the report detail page |
+
+Two API endpoints are also feature-gated and return `410 Gone` when their flag is off:
+
+| Flag | Endpoint |
+|---|---|
+| `reports.bulk_actions` | `DELETE /api/reports/bulk` |
+| `reports.photo_attachments` | `POST /api/reports/{id}/photos` |
 
 ## Tests and linting
 
