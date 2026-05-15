@@ -11,6 +11,7 @@ export function BulkActionsToolbar({ reportIds }: Props) {
   const enabled = useFeatureFlag("reports.bulk_actions");
   const router = useRouter();
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   if (!enabled) return null;
@@ -23,7 +24,14 @@ export function BulkActionsToolbar({ reportIds }: Props) {
     if (selected.size === 0) return;
     if (!confirm(`Delete ${selected.size} report${selected.size === 1 ? "" : "s"}? This cannot be undone.`)) return;
     startTransition(async () => {
-      await bulkDeleteAction([...selected]);
+      setMessage(null);
+      const result = await bulkDeleteAction([...selected]);
+      if ("error" in result) {
+        setMessage(result.message);
+        router.refresh();
+        return;
+      }
+
       setSelected(new Set());
       router.refresh();
     });
@@ -54,6 +62,12 @@ export function BulkActionsToolbar({ reportIds }: Props) {
           </svg>
           {pending ? "Deleting…" : `Delete ${selected.size}`}
         </button>
+      )}
+
+      {message && (
+        <span className="text-xs font-medium text-red-600">
+          {message}
+        </span>
       )}
 
       <span className="ml-auto text-xs font-medium text-violet-600">

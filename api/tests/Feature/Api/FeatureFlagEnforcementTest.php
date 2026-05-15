@@ -37,14 +37,14 @@ it('passes attributes through the context for attribute-gated flags', function (
     // Customer role → attribute rule fails → 410
     $this->deleteJson('/api/reports/bulk', [
         'ids' => [],
-        'subject' => 'user-1',
+        'user_id' => 'user-1',
         'attributes' => ['role' => 'customer'],
     ])->assertStatus(410);
 
     // Admin role → attribute rule passes → proceeds to controller
     $this->deleteJson('/api/reports/bulk', [
         'ids' => [],
-        'subject' => 'user-1',
+        'user_id' => 'user-1',
         'attributes' => ['role' => 'admin'],
     ])->assertStatus(422); // 422 = no IDs provided, past the flag gate
 });

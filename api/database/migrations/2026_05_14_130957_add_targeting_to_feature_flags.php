@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::table('feature_flags', function (Blueprint $table): void {
             // Audience targeting: list of {attribute, values} clauses (AND-ed).
-            // Empty array means all subjects are eligible.
+            // Empty array means all users are eligible.
             $table->json('attribute_rules')->default('[]')->after('enabled');
 
-            // Fraction of eligible subjects that see the feature (0–100).
+            // Fraction of eligible users that see the feature (0–100).
             // Null means 100 % — no percentage gate applied.
             $table->unsignedSmallInteger('rollout_percentage')->nullable()->after('attribute_rules');
 

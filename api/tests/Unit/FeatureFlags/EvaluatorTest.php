@@ -7,7 +7,7 @@ use Illuminate\Support\Carbon;
 
 beforeEach(function (): void {
     $this->evaluator = app(Evaluator::class);
-    $this->ctx = new EvaluationContext(subject: 'subject-1');
+    $this->ctx = new EvaluationContext(userId: 'user-1');
 });
 
 it('returns true when the flag is enabled with no other rules', function (): void {
@@ -74,27 +74,27 @@ it('returns true when no schedule window is set', function (): void {
 
 it('returns true when attribute_rules is empty', function (): void {
     $flag = new FeatureFlag(['name' => 'f', 'enabled' => true, 'attribute_rules' => []]);
-    $ctx = new EvaluationContext(subject: 's', attributes: []);
+    $ctx = new EvaluationContext(userId: 's', attributes: []);
 
     expect($this->evaluator->evaluate($flag, $ctx))->toBeTrue();
 });
 
-it('returns true when the subject matches a single rule', function (): void {
+it('returns true when the user matches a single rule', function (): void {
     $flag = new FeatureFlag([
         'name' => 'f', 'enabled' => true,
         'attribute_rules' => [['attribute' => 'role', 'values' => ['admin']]],
     ]);
-    $ctx = new EvaluationContext(subject: 's', attributes: ['role' => 'admin']);
+    $ctx = new EvaluationContext(userId: 's', attributes: ['role' => 'admin']);
 
     expect($this->evaluator->evaluate($flag, $ctx))->toBeTrue();
 });
 
-it('returns false when the subject does not match a rule', function (): void {
+it('returns false when the user does not match a rule', function (): void {
     $flag = new FeatureFlag([
         'name' => 'f', 'enabled' => true,
         'attribute_rules' => [['attribute' => 'role', 'values' => ['admin']]],
     ]);
-    $ctx = new EvaluationContext(subject: 's', attributes: ['role' => 'customer']);
+    $ctx = new EvaluationContext(userId: 's', attributes: ['role' => 'customer']);
 
     expect($this->evaluator->evaluate($flag, $ctx))->toBeFalse();
 });
@@ -117,8 +117,8 @@ it('requires all rules to match (AND logic)', function (): void {
         ],
     ]);
 
-    $passing = new EvaluationContext(subject: 's', attributes: ['country' => 'NL', 'role' => 'admin']);
-    $failing = new EvaluationContext(subject: 's', attributes: ['country' => 'NL', 'role' => 'customer']);
+    $passing = new EvaluationContext(userId: 's', attributes: ['country' => 'NL', 'role' => 'admin']);
+    $failing = new EvaluationContext(userId: 's', attributes: ['country' => 'NL', 'role' => 'customer']);
 
     expect($this->evaluator->evaluate($flag, $passing))->toBeTrue()
         ->and($this->evaluator->evaluate($flag, $failing))->toBeFalse();
@@ -130,9 +130,9 @@ it('matches any value in the values list (OR within a rule)', function (): void 
         'attribute_rules' => [['attribute' => 'country', 'values' => ['NL', 'BE']]],
     ]);
 
-    $nl = new EvaluationContext(subject: 's', attributes: ['country' => 'NL']);
-    $be = new EvaluationContext(subject: 's', attributes: ['country' => 'BE']);
-    $de = new EvaluationContext(subject: 's', attributes: ['country' => 'DE']);
+    $nl = new EvaluationContext(userId: 's', attributes: ['country' => 'NL']);
+    $be = new EvaluationContext(userId: 's', attributes: ['country' => 'BE']);
+    $de = new EvaluationContext(userId: 's', attributes: ['country' => 'DE']);
 
     expect($this->evaluator->evaluate($flag, $nl))->toBeTrue()
         ->and($this->evaluator->evaluate($flag, $be))->toBeTrue()
@@ -144,7 +144,7 @@ it('uses strict string comparison — integer 1 does not match string "1"', func
         'name' => 'f', 'enabled' => true,
         'attribute_rules' => [['attribute' => 'tier', 'values' => ['1']]],
     ]);
-    $ctx = new EvaluationContext(subject: 's', attributes: ['tier' => '1']);
+    $ctx = new EvaluationContext(userId: 's', attributes: ['tier' => '1']);
 
     expect($this->evaluator->evaluate($flag, $ctx))->toBeTrue();
 });
@@ -155,27 +155,27 @@ it('returns true when rollout_percentage is null (100 %)', function (): void {
     expect($this->evaluator->evaluate($flag, $this->ctx))->toBeTrue();
 });
 
-it('returns false for every subject when rollout_percentage is 0', function (): void {
+it('returns false for every user when rollout_percentage is 0', function (): void {
     $flag = new FeatureFlag(['name' => 'f', 'enabled' => true, 'attribute_rules' => [], 'rollout_percentage' => 0]);
 
-    foreach (['a', 'b', 'c', 'd', 'e'] as $subject) {
-        $ctx = new EvaluationContext(subject: $subject);
-        expect($this->evaluator->evaluate($flag, $ctx))->toBeFalse("subject '$subject' should be excluded at 0 %");
+    foreach (['a', 'b', 'c', 'd', 'e'] as $user) {
+        $ctx = new EvaluationContext(userId: $user);
+        expect($this->evaluator->evaluate($flag, $ctx))->toBeFalse("user '$user' should be excluded at 0 %");
     }
 });
 
-it('returns true for every subject when rollout_percentage is 100', function (): void {
+it('returns true for every user when rollout_percentage is 100', function (): void {
     $flag = new FeatureFlag(['name' => 'f', 'enabled' => true, 'attribute_rules' => [], 'rollout_percentage' => 100]);
 
-    foreach (['a', 'b', 'c', 'd', 'e'] as $subject) {
-        $ctx = new EvaluationContext(subject: $subject);
-        expect($this->evaluator->evaluate($flag, $ctx))->toBeTrue("subject '$subject' should be included at 100 %");
+    foreach (['a', 'b', 'c', 'd', 'e'] as $user) {
+        $ctx = new EvaluationContext(userId: $user);
+        expect($this->evaluator->evaluate($flag, $ctx))->toBeTrue("user '$user' should be included at 100 %");
     }
 });
 
-it('is deterministic for the same subject', function (): void {
+it('is deterministic for the same user', function (): void {
     $flag = new FeatureFlag(['name' => 'reports.feature', 'enabled' => true, 'attribute_rules' => [], 'rollout_percentage' => 50]);
-    $ctx = new EvaluationContext(subject: 'user-42');
+    $ctx = new EvaluationContext(userId: 'user-42');
 
     $first = $this->evaluator->evaluate($flag, $ctx);
     for ($i = 0; $i < 10; $i++) {
@@ -183,8 +183,8 @@ it('is deterministic for the same subject', function (): void {
     }
 });
 
-it('gives the same subject the same bucket across all flags (user-consistent bucketing)', function (): void {
-    $ctx = new EvaluationContext(subject: 'user-999');
+it('gives the same user the same bucket across all flags (user-consistent bucketing)', function (): void {
+    $ctx = new EvaluationContext(userId: 'user-999');
     $results = [];
 
     foreach (['flag.a', 'flag.b', 'flag.c', 'flag.d', 'flag.e'] as $name) {
@@ -195,14 +195,14 @@ it('gives the same subject the same bucket across all flags (user-consistent buc
     expect(count(array_unique($results)))->toBe(1);
 });
 
-it('distributes roughly correctly over many subjects at 50 %', function (): void {
+it('distributes roughly correctly over many users at 50 %', function (): void {
     $flag = new FeatureFlag(['name' => 'rollout.test', 'enabled' => true, 'attribute_rules' => [], 'rollout_percentage' => 50]);
 
     $included = 0;
     $total = 1000;
 
     for ($i = 0; $i < $total; $i++) {
-        $ctx = new EvaluationContext(subject: "subject-{$i}");
+        $ctx = new EvaluationContext(userId: "user-{$i}");
         if ($this->evaluator->evaluate($flag, $ctx)) {
             $included++;
         }

@@ -3,6 +3,11 @@
 use App\Models\FeatureFlag;
 use Illuminate\Support\Facades\Cache;
 
+it('redirects the admin root to the feature flag index', function (): void {
+    $this->get(route('admin.dashboard'))
+        ->assertRedirect(route('admin.feature_flags.index'));
+});
+
 it('renders the flag index page', function (): void {
     FeatureFlag::factory()->create(['name' => 'alpha.flag', 'enabled' => true]);
     FeatureFlag::factory()->disabled()->create(['name' => 'beta.flag']);

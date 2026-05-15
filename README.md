@@ -5,7 +5,10 @@ A take-home assignment. Laravel handles the feature flag admin and evaluation AP
 ## Running locally
 
 ```bash
-make bootstrap   # first run — starts everything, migrates, seeds
+docker compose up --build
+
+# Optional convenience wrappers
+make bootstrap   # build and start in the background
 make up          # subsequent starts
 make down        # stop
 make fresh       # wipe all data and start clean
@@ -23,7 +26,7 @@ api/   Laravel — flag management UI, evaluation endpoint
 web/   Next.js — damage reports client
 ```
 
-The Laravel API owns feature flags entirely. The Next.js app owns damage reports in its own local SQLite database. The two apps are decoupled: the client calls one endpoint to evaluate which flags are on, then renders accordingly.
+The Laravel API owns feature flags entirely. The Next.js app owns damage reports in its own local SQLite database. The two apps are decoupled: the client calls one endpoint to evaluate which flags are on, then renders accordingly. The containers run migrations and seed data on startup, so `docker compose up --build` is enough for a fresh clone.
 
 ## Feature flags
 
@@ -32,7 +35,7 @@ A flag is **active** only when all of the following are true:
 1. It is **enabled**
 2. The current time is within its **schedule** window (`starts_at` → `ends_at`)
 3. The request's **audience attributes** match its targeting rules (e.g. `country = NL`)
-4. The subject's **rollout bucket** is below the percentage threshold
+4. The user's **rollout bucket** is below the percentage threshold
 
 Steps 3 and 4 are optional — a flag with no rules and no percentage cap is simply on for everyone.
 
@@ -62,7 +65,6 @@ The client has no real auth. A pill in the nav lets you switch country and role 
 | `reports.bulk_actions` | `role = admin` | Admin-only feature |
 | `form.description_first` | `country = NL`, 50% | Gradual rollout to NL |
 | `reports.photo_attachments` | Everyone, 25% | Beta feature |
-| `reports.ai_damage_estimate` | `plan = premium` | Attribute targeting |
 | `dashboard.v2` | Everyone, 20% | Scheduled — starts next week |
 | `promo.winter_2024` | Everyone | Expired — Dec 2024 campaign |
 
@@ -75,7 +77,7 @@ The client has no real auth. A pill in the nav lets you switch country and role 
 | `form.description_first` | `ReportFormView` | `country = NL`, 50% rollout | Reorders the new and edit report forms to show damage description first |
 | `reports.photo_attachments` | `PhotoAttachments` | Everyone, 25% rollout | Photo documentation section on the report detail page |
 
-Two API endpoints are also feature-gated and return `410 Gone` when their flag is off:
+The live Next.js server actions re-check their feature flag immediately before mutating data, so a stale rendered control becomes a no-op with an inline error if the flag was disabled after the page loaded. Matching Laravel API endpoints are also feature-gated and return `410 Gone` when their flag is off:
 
 | Flag | Endpoint |
 |---|---|
@@ -85,7 +87,8 @@ Two API endpoints are also feature-gated and return `410 Gone` when their flag i
 ## Tests and linting
 
 ```bash
-make test                                        # 78 Pest tests
+make test                                        # Pest test suite
 docker compose exec api vendor/bin/pint --dirty  # PHP style
 docker compose exec web npm run lint             # ESLint
+docker compose exec web npm run build            # Next.js production build
 ```

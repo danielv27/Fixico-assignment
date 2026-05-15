@@ -23,7 +23,7 @@ final readonly class Evaluator
             return false;
         }
 
-        if (! $this->withinPercentage($flag, $context->subject)) {
+        if (! $this->withinPercentage($flag, $context->userId)) {
             return false;
         }
 
@@ -77,13 +77,13 @@ final readonly class Evaluator
         return true;
     }
 
-    private function withinPercentage(FeatureFlag $flag, string $subject): bool
+    private function withinPercentage(FeatureFlag $flag, string $userId): bool
     {
         if ($flag->rollout_percentage === null) {
             return true;
         }
 
-        $bucket = abs(crc32($subject)) % 100;
+        $bucket = abs(crc32($userId)) % 100;
 
         return $bucket < $flag->rollout_percentage;
     }

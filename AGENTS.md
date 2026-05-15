@@ -61,6 +61,6 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
  
 <!-- END:nextjs-agent-rules -->
 
-- The web app should consume the API through `NEXT_PUBLIC_API_BASE_URL`.
+- The web app should consume the API through `API_URL`.
 - Use conditionally rendered pages/components to demonstrate flag behavior.
 - Keep the UI practical and workflow-focused for car damage report management.

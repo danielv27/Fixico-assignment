@@ -16,7 +16,7 @@ If working directly inside `web/`, use the same npm scripts after installing dep
 ## Conventions
 
 - Use the app router.
-- Read `NEXT_PUBLIC_API_BASE_URL` for API calls.
+- Read `API_URL` for API calls.
 - Keep flag-aware UI states explicit: loading, enabled, disabled, and stale interaction handling.
 - Build the car damage report UI as the primary experience, not a landing page.
 - If installed dependencies are present, check local Next.js docs before relying on memory for canary-specific APIs.

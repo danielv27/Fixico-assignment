@@ -9,4 +9,4 @@ docker compose exec web npm run lint
 docker compose exec web npm run build
 ```
 
-The client should read the API base URL from `NEXT_PUBLIC_API_BASE_URL`.
+The client should read the API base URL from `API_URL`.

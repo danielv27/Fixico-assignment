@@ -18,7 +18,7 @@
     <header class="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur-sm shadow-sm">
         <div class="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-3.5">
             <div class="flex items-center gap-6">
-                <a href="{{ route('admin.dashboard') }}" class="group flex items-center gap-2.5">
+                <a href="{{ route('admin.feature_flags.index') }}" class="group flex items-center gap-2.5">
                     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 shadow-sm transition-transform group-hover:scale-105">
                         <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>

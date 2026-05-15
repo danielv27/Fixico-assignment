@@ -7,7 +7,7 @@ it('returns a batch of flag decisions', function (): void {
     FeatureFlag::factory()->create(['name' => 'flag.b', 'enabled' => false]);
 
     $response = $this->postJson('/api/feature_flags/evaluate', [
-        'subject' => 'subject-1',
+        'user_id' => 'user-1',
     ]);
 
     $response->assertOk()->assertExactJson([
@@ -15,14 +15,14 @@ it('returns a batch of flag decisions', function (): void {
     ]);
 });
 
-it('requires a subject', function (): void {
+it('requires a user_id', function (): void {
     $this->postJson('/api/feature_flags/evaluate', [])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['subject']);
+        ->assertJsonValidationErrors(['user_id']);
 });
 
 it('returns an empty map when no flags are defined', function (): void {
-    $this->postJson('/api/feature_flags/evaluate', ['subject' => 'subject-1'])
+    $this->postJson('/api/feature_flags/evaluate', ['user_id' => 'user-1'])
         ->assertOk()
         ->assertExactJson(['flags' => []]);
 });

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 /**
  * Enforces that a named feature flag is currently enabled for the request
- * subject/attributes. Returns 410 Gone when the feature flag is off.
+ * user/attributes. Returns 410 Gone when the feature flag is off.
  *
  * Usage in routes: Route::middleware('feature_flag:reports.bulk_actions')
  *
@@ -43,7 +43,7 @@ class RequireFeatureFlag
     private function contextFrom(Request $request): EvaluationContext
     {
         return new EvaluationContext(
-            subject: $request->input('user_id', 'anonymous'),
+            userId: $request->input('user_id', 'anonymous'),
             attributes: $request->input('attributes', []),
         );
     }

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import db from "@/lib/db";
+import { isFeatureEnabledForCurrentUser } from "@/lib/flags/server";
 import {
   ALLOWED_STATUSES,
   bulkDeleteReports,
@@ -18,6 +19,29 @@ export type FormState = {
   errors?: ValidationErrors;
   message?: string;
 };
+
+type FeatureDisabledResult = {
+  error: "feature_disabled";
+  flag: string;
+  message: string;
+};
+
+type BulkDeleteResult = { deleted: number } | FeatureDisabledResult;
+type SavePhotosResult = { saved: true } | FeatureDisabledResult;
+
+async function disabledResultFor(
+  flag: string,
+): Promise<FeatureDisabledResult | null> {
+  if (await isFeatureEnabledForCurrentUser(flag)) {
+    return null;
+  }
+
+  return {
+    error: "feature_disabled",
+    flag,
+    message: "This feature is no longer available.",
+  };
+}
 
 function parseInput(formData: FormData): ReportInput {
   const status = formData.get("status")?.toString();
@@ -66,15 +90,28 @@ export async function updateReportAction(
   }
 }
 
-export async function bulkDeleteAction(ids: number[]): Promise<{ deleted: number }> {
+export async function bulkDeleteAction(
+  ids: number[],
+): Promise<BulkDeleteResult> {
+  const disabled = await disabledResultFor("reports.bulk_actions");
+  if (disabled) return disabled;
+
   const deleted = bulkDeleteReports(ids);
   revalidatePath("/");
   return { deleted };
 }
 
-export async function savePhotosAction(reportId: number, urls: string[]): Promise<void> {
+export async function savePhotosAction(
+  reportId: number,
+  urls: string[],
+): Promise<SavePhotosResult> {
+  const disabled = await disabledResultFor("reports.photo_attachments");
+  if (disabled) return disabled;
+
   db.prepare(
     "UPDATE damage_reports SET photos = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?",
   ).run(JSON.stringify(urls), reportId);
   revalidatePath(`/reports/${reportId}`);
+
+  return { saved: true };
 }

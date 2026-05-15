@@ -8,4 +8,6 @@ if [ ! -f .env ]; then
     php artisan key:generate --ansi
 fi
 
+php artisan migrate --seed
+
 exec "$@"

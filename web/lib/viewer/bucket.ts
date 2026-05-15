@@ -1,4 +1,4 @@
-// Mirrors PHP's abs(crc32($subject)) % 100 purely for display — the API owns the authoritative evaluation.
+// Mirrors PHP's abs(crc32($userId)) % 100 purely for display; the API owns the authoritative evaluation.
 const TABLE = (() => {
   const t = new Int32Array(256);
   for (let i = 0; i < 256; i++) {

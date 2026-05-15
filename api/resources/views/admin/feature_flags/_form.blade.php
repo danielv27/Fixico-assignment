@@ -14,8 +14,10 @@
 
             <div x-data="{ on: {{ old('enabled', $enabled ?? false) ? 'true' : 'false' }} }">
                 <input type="hidden" name="enabled" :value="on ? '1' : '0'">
-                <button type="button" @click="on = !on"
-                        class="flex items-center gap-3 group"
+                <button type="button"
+                        @click="{{ ($isExpired ?? false) ? 'null' : 'on = !on' }}"
+                        @disabled($isExpired ?? false)
+                        class="flex items-center gap-3 group {{ ($isExpired ?? false) ? 'cursor-not-allowed opacity-60' : '' }}"
                         :aria-pressed="on">
                     <div class="relative flex h-5 w-9 rounded-full transition-colors duration-200"
                          :class="on ? 'bg-emerald-500' : 'bg-zinc-300'">
@@ -245,7 +247,7 @@
                     <div class="text-xs leading-relaxed text-blue-800">
                         <span class="font-semibold">Illustration only.</span>
                         These 200 users are synthetically generated — exactly 2 per bucket — to show how percentage rollouts distribute evenly across your user base.
-                        In production, subjects are real user identifiers (UUIDs, emails, etc.) which distribute the same way naturally.
+                        In production, user IDs are real identifiers (UUIDs, emails, etc.) which distribute the same way naturally.
                     </div>
                 </div>
             </div>

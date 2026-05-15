@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useFeatureFlag } from "@/lib/flags/context";
 import { savePhotosAction } from "@/app/reports/actions";
 
@@ -13,6 +14,7 @@ export function PhotoAttachments({ reportId }: Props) {
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   if (!enabled) return null;
 
@@ -30,7 +32,13 @@ export function PhotoAttachments({ reportId }: Props) {
     setMessage(null);
     startTransition(async () => {
       try {
-        await savePhotosAction(reportId, urls);
+        const result = await savePhotosAction(reportId, urls);
+        if ("error" in result) {
+          setMessage({ type: "error", text: result.message });
+          router.refresh();
+          return;
+        }
+
         setMessage({ type: "ok", text: "Photos saved." });
       } catch {
         setMessage({ type: "error", text: "Could not save photos." });

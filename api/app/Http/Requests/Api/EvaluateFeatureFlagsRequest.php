@@ -24,7 +24,7 @@ class EvaluateFeatureFlagsRequest extends FormRequest
     public function context(): EvaluationContext
     {
         return new EvaluationContext(
-            subject: $this->string('user_id')->toString(),
+            userId: $this->string('user_id')->toString(),
             attributes: $this->array('attributes'),
         );
     }
