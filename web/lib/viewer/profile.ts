@@ -2,7 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
-const COOKIE = "fixico_viewer";
+export const VIEWER_COOKIE = "fixico_viewer";
 
 export type ViewerProfile = {
   country: string;
@@ -13,7 +13,7 @@ export const DEFAULT_PROFILE: ViewerProfile = { country: "NL", role: "customer" 
 
 export async function getViewerProfile(): Promise<ViewerProfile> {
   const jar = await cookies();
-  const raw = jar.get(COOKIE)?.value;
+  const raw = jar.get(VIEWER_COOKIE)?.value;
 
   if (!raw) return DEFAULT_PROFILE;
 
@@ -27,5 +27,3 @@ export async function getViewerProfile(): Promise<ViewerProfile> {
     return DEFAULT_PROFILE;
   }
 }
-
-export const VIEWER_COOKIE = COOKIE;

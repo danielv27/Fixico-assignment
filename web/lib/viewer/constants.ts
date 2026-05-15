@@ -1,3 +1,5 @@
+export const SUBJECT_COOKIE = "fixico_subject";
+
 export const COUNTRIES_OPTIONS = ["NL", "BE", "DE", "FR", "GB"] as const;
 export const ROLE_OPTIONS = ["customer", "mechanic", "admin"] as const;
 

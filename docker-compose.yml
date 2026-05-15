@@ -1,12 +1,29 @@
 services:
+  api:
+    build: ./api
+    volumes:
+      - ./api/vendor:/var/www/html/vendor
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+
   postgres:
     image: postgres:17-alpine
     environment:
       POSTGRES_DB: fixico_assignment
       POSTGRES_USER: fixico
       POSTGRES_PASSWORD: fixico
-    ports:
-      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -17,8 +34,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -26,30 +41,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  api:
-    build: ./api
-    # Bind-mount the host .env so edits take effect without rebuilding.
-    # We don't use `env_file:` here because Laravel's `php artisan serve`
-    # strips most OS env vars from its PHP worker; values must come from
-    # the .env file on disk, not the process environment.
-    volumes:
-      - ./api/.env:/var/www/html/.env
-    ports:
-      - "8000:8000"
-    depends_on:
-      postgres: { condition: service_healthy }
-      redis: { condition: service_healthy }
-
-  web:
-    build: ./web
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
-      INTERNAL_API_BASE_URL: http://api:8000
-    ports:
-      - "3001:3000"
-    depends_on:
-      - api
 
 volumes:
   postgres-data:

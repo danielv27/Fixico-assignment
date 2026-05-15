@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 import type { DamageReport, ReportStatus } from "@/lib/api/reports";
 import type { FormState } from "@/app/reports/actions";
 
@@ -8,6 +8,7 @@ type Props = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   initial?: DamageReport;
   submitLabel: string;
+  children?: ReactNode;
 };
 
 const STATUS_OPTIONS: { value: ReportStatus; label: string; description: string }[] = [
@@ -16,15 +17,13 @@ const STATUS_OPTIONS: { value: ReportStatus; label: string; description: string 
   { value: "approved", label: "Approved", description: "Assessment approved" },
 ];
 
-export function ReportForm({ action, initial, submitLabel }: Props) {
+export function ReportForm({ action, initial, submitLabel, children }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
-
-      {/* Vehicle details */}
-      <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <legend className="mb-4 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+      <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <legend className="mb-4 text-sm font-semibold text-zinc-800">
           Vehicle
         </legend>
         <div className="grid grid-cols-2 gap-4">
@@ -55,13 +54,12 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
         </div>
       </fieldset>
 
-      {/* Damage description */}
-      <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <legend className="mb-4 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+      <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <legend className="mb-4 text-sm font-semibold text-zinc-800">
           Damage
         </legend>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="description" className="text-sm font-medium text-zinc-700">
             Description
           </label>
           <textarea
@@ -70,7 +68,7 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
             rows={3}
             defaultValue={initial?.description}
             placeholder="Describe the damage — location, severity, circumstances…"
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
           {state.errors?.description?.[0] && (
             <p className="text-xs text-red-600">{state.errors.description[0]}</p>
@@ -78,17 +76,16 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
         </div>
       </fieldset>
 
-      {/* Status (edit only) */}
       {initial && (
-        <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <legend className="mb-4 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+        <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <legend className="mb-4 text-sm font-semibold text-zinc-800">
             Status
           </legend>
           <div className="grid grid-cols-3 gap-2">
             {STATUS_OPTIONS.map((opt) => (
               <label
                 key={opt.value}
-                className="relative flex cursor-pointer flex-col gap-0.5 rounded-lg border border-zinc-200 bg-zinc-50 p-3 transition-all has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-800 dark:has-[:checked]:border-emerald-600 dark:has-[:checked]:bg-emerald-950/40"
+                className="relative flex cursor-pointer flex-col gap-0.5 rounded-lg border border-zinc-200 bg-zinc-50 p-3 transition-all has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50"
               >
                 <input
                   type="radio"
@@ -97,8 +94,8 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
                   defaultChecked={initial.status === opt.value}
                   className="sr-only"
                 />
-                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{opt.label}</span>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400">{opt.description}</span>
+                <span className="text-sm font-medium text-zinc-800">{opt.label}</span>
+                <span className="text-xs text-zinc-500">{opt.description}</span>
               </label>
             ))}
           </div>
@@ -108,7 +105,8 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
         </fieldset>
       )}
 
-      {/* Actions */}
+      {children}
+
       <div className="flex items-center gap-3">
         <button
           type="submit"
@@ -127,7 +125,7 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
         </button>
 
         {state.message && (
-          <span className="flex items-center gap-1.5 text-sm text-emerald-700 dark:text-emerald-400">
+          <span className="flex items-center gap-1.5 text-sm text-emerald-700">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
             </svg>
@@ -147,7 +145,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <label htmlFor={name} className="text-sm font-medium text-zinc-700">
         {label}
       </label>
       <input
@@ -156,7 +154,7 @@ function Field({
         type="text"
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className={`rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 ${error ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""} ${mono ? "font-mono" : ""}`}
+        className={`rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 ${error ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""} ${mono ? "font-mono" : ""}`}
       />
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>

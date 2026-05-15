@@ -14,7 +14,7 @@ export default function NewReportPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
+          className="inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-800"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -25,7 +25,6 @@ export default function NewReportPage() {
         <p className="mt-0.5 text-sm text-zinc-500">Fill in the details of the damage for assessment.</p>
       </div>
 
-      {/* Conditional component #3 — rolling out to NL users (50 %) */}
       <div className="mb-5">
         <NewReportBanner />
       </div>

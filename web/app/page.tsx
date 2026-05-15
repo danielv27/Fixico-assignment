@@ -3,13 +3,12 @@ import { ReportList } from "@/components/ReportList";
 import { BulkActionsToolbar } from "@/components/BulkActionsToolbar";
 import { listReports } from "@/lib/api/reports";
 
-export default async function Home() {
-  const reports = await listReports();
+export default function Home() {
+  const reports = listReports();
   const ids = reports.map((r) => r.id);
 
   return (
-    <>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Damage Reports</h1>
@@ -30,7 +29,6 @@ export default async function Home() {
           </Link>
         </div>
 
-        {/* Conditional component #1 — bulk actions (admin only) */}
         {ids.length > 0 && (
           <div className="mt-4">
             <BulkActionsToolbar reportIds={ids} />
@@ -40,7 +38,6 @@ export default async function Home() {
         <div className="mt-4">
           <ReportList reports={reports} />
         </div>
-      </main>
-    </>
+    </main>
   );
 }

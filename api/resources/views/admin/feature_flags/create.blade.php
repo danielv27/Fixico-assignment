@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('admin.flags.index') }}"
+        <a href="{{ route('admin.feature_flags.index') }}"
            class="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -15,7 +15,7 @@
         <h1 class="text-xl font-semibold tracking-tight">New flag</h1>
     </div>
 
-    <form method="POST" action="{{ route('admin.flags.store') }}">
+    <form method="POST" action="{{ route('admin.feature_flags.store') }}">
         @csrf
 
         {{-- Name (create-only) --}}
@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        @include('admin.flags._form', [
+        @include('admin.feature_flags._form', [
             'rulesJson'   => old('attribute_rules', '[]'),
             'pct'         => old('rollout_percentage'),
             'startsAt'    => old('starts_at', ''),
@@ -44,7 +44,7 @@
         ])
 
         <div class="mt-6 flex items-center justify-end gap-3">
-            <a href="{{ route('admin.flags.index') }}"
+            <a href="{{ route('admin.feature_flags.index') }}"
                class="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
                 Cancel
             </a>

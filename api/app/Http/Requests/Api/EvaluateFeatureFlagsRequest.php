@@ -5,7 +5,7 @@ namespace App\Http\Requests\Api;
 use App\FeatureFlags\EvaluationContext;
 use Illuminate\Foundation\Http\FormRequest;
 
-class EvaluateFlagsRequest extends FormRequest
+class EvaluateFeatureFlagsRequest extends FormRequest
 {
     public function authorize(): bool
     {

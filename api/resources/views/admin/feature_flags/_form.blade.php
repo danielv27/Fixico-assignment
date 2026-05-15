@@ -1,18 +1,4 @@
-{{--
-  Shared form fields for create / edit.
-  Variables expected:
-    $rulesJson   - JSON-encoded initial attribute_rules (e.g. "[]")
-    $pct         - initial rollout_percentage value or null
-    $startsAt    - initial starts_at formatted for datetime-local or null
-    $endsAt      - initial ends_at formatted for datetime-local or null
-    $description - initial description
-    $enabled     - initial enabled boolean
-    $flagName    - flag slug for the evaluate simulator (null on create)
---}}
-
 <div class="flex flex-col gap-6">
-
-    {{-- ── Basic info ──────────────────────────────────────────────── --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <h2 class="text-sm font-semibold text-zinc-800">Basic info</h2>
         <div class="mt-4 flex flex-col gap-4">
@@ -26,7 +12,6 @@
                 @enderror
             </div>
 
-            {{-- Toggle --}}
             <div x-data="{ on: {{ old('enabled', $enabled ?? false) ? 'true' : 'false' }} }">
                 <input type="hidden" name="enabled" :value="on ? '1' : '0'">
                 <button type="button" @click="on = !on"
@@ -39,11 +24,16 @@
                     </div>
                     <span class="text-sm font-medium text-zinc-700" x-text="on ? 'Enabled' : 'Disabled'"></span>
                 </button>
+
+                @if ($isExpired ?? false)
+                    <p class="mt-2 text-xs text-amber-600">
+                        This flag is expired — the enabled state has no effect until you extend the expiry date.
+                    </p>
+                @endif
             </div>
         </div>
     </div>
 
-    {{-- ── Audience targeting ───────────────────────────────────────── --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
          x-data="rulesBuilder({{ $rulesJson }})">
 
@@ -84,7 +74,6 @@
                         </button>
                     </div>
 
-                    {{-- Multi-select chips — predefined per attribute --}}
                     <div class="mt-2.5 flex flex-wrap gap-1.5">
                         <template x-for="opt in optionsFor(rule.attribute)" :key="opt">
                             <button type="button"
@@ -118,7 +107,6 @@
         @enderror
     </div>
 
-    {{-- ── Schedule ─────────────────────────────────────────────────── --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <h2 class="text-sm font-semibold text-zinc-800">Schedule <span class="font-normal text-zinc-400">(optional)</span></h2>
         <p class="mt-0.5 text-xs text-zinc-500">Leave blank for no boundary on that side.</p>
@@ -144,7 +132,6 @@
         </div>
     </div>
 
-    {{-- ── Rollout percentage ───────────────────────────────────────── --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
          x-data="percentageSlider({{ $pct ?? 'null' }})">
 
@@ -180,7 +167,6 @@
                 </div>
             </div>
 
-            {{-- ─ Distribution preview ────────────────────────────────── --}}
             <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4" x-init="buildSample()">
 
                 <div class="mb-3 flex items-center justify-between">
@@ -188,7 +174,6 @@
                     <span class="text-xs text-zinc-400">2 per bucket · 200 total</span>
                 </div>
 
-                {{-- 10×10 bucket grid --}}
                 <div class="grid gap-0.5" style="grid-template-columns: repeat(10, 1fr)">
                     <template x-for="b in 100" :key="b">
                         <div class="flex h-8 cursor-default flex-col items-center justify-center rounded-sm transition-colors"
@@ -205,7 +190,6 @@
                     </template>
                 </div>
 
-                {{-- Summary row --}}
                 <div class="mt-3 mb-3 flex items-center justify-between border-b border-zinc-200 pb-3">
                     <div class="flex items-center gap-3 text-xs text-zinc-500">
                         <span class="flex items-center gap-1.5">
@@ -224,7 +208,6 @@
                     </p>
                 </div>
 
-                {{-- Scrollable user list --}}
                 <div class="max-h-56 overflow-y-auto rounded-lg border border-zinc-200 bg-white">
                     <table class="w-full text-xs">
                         <thead class="sticky top-0 bg-zinc-50 shadow-sm">
@@ -255,7 +238,6 @@
                     </table>
                 </div>
 
-                {{-- Always-visible note — makes clear this is synthetic demo data --}}
                 <div class="mt-3 flex items-start gap-2.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-3">
                     <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
@@ -277,9 +259,6 @@
 </div>
 
 <script>
-// ---------------------------------------------------------------------------
-// Attribute options — matches the allow-list in StoreFlagRequest / UpdateFlagRequest
-// ---------------------------------------------------------------------------
 const ATTRIBUTE_OPTIONS = {
     country: ['NL', 'BE', 'DE', 'FR', 'GB'],
     role: ['admin', 'mechanic', 'customer'],
@@ -322,9 +301,7 @@ function rulesBuilder(initial) {
     };
 }
 
-// ---------------------------------------------------------------------------
 // CRC32 — PHP-compatible, used once to pre-generate the even sample.
-// ---------------------------------------------------------------------------
 const _t32 = (() => {
     const t = new Uint32Array(256);
     for (let i = 0; i < 256; i++) {
@@ -343,14 +320,11 @@ function _crc32(str) {
     return u > 0x7FFFFFFF ? u - 0x100000000 : u;
 }
 
-// ---------------------------------------------------------------------------
-// Percentage slider + pre-computed even user sample
-// ---------------------------------------------------------------------------
 function percentageSlider(initial) {
     return {
         enabled: initial !== null,
         value: initial ?? 100,
-        sample: [],   // [{name, bucket}] — 200 items, exactly 2 per bucket
+        sample: [],
 
         buildSample() {
             const items = [];
@@ -364,7 +338,6 @@ function percentageSlider(initial) {
                     items.push({ name, bucket: b });
                 }
             }
-            // Sort by bucket so in-rollout rows cluster at the top as you drag
             this.sample = items.sort((a, b) => a.bucket - b.bucket);
         },
     };

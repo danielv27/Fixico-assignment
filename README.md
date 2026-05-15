@@ -1,84 +1,75 @@
 # Fixico Feature Flag Service
 
-A take-home assignment: Laravel admin + API in `api/`, Next.js client in `web/`, wired through Docker Compose.
+A take-home assignment. Laravel handles the feature flag admin and evaluation API. Next.js is the client app — a car damage report tool that exercises the flags in practice.
 
-## Run
+## Running locally
 
 ```bash
-make bootstrap   # first time
+make bootstrap   # first run — starts everything, migrates, seeds
 make up          # subsequent starts
 make down        # stop
-make fresh       # wipe volumes and rebuild
+make fresh       # wipe all data and start clean
 ```
 
 | URL | What |
 |---|---|
-| http://localhost:3001 | Next.js damage-report client |
-| http://localhost:8000/admin/flags | Laravel Blade admin |
-| http://localhost:8000/api | JSON API |
+| http://localhost:3001 | Next.js client |
+| http://localhost:8000/admin | Flag admin |
 
-## Architecture
+## How it's structured
 
-| App | Stack | Responsibility |
-|---|---|---|
-| Laravel 13 | Blade + JSON API | Flag management UI, evaluation endpoint, reports API |
-| Next.js 16 | React 19 RSC | Damage reports UI with flag-driven conditional components |
+```
+api/   Laravel — flag management UI, evaluation endpoint
+web/   Next.js — damage reports client
+```
 
-Admin lives in Laravel (the assignment says "admin environment (the back-end)"). The Next.js app is purely the client.
+The Laravel API owns feature flags entirely. The Next.js app owns damage reports in its own local SQLite database. The two apps are decoupled: the client calls one endpoint to evaluate which flags are on, then renders accordingly.
 
-## Flag evaluation
+## Feature flags
 
-A flag is **on** only if all four steps pass, in order:
+A flag is **active** only when all of the following are true:
 
-1. `enabled` master switch
-2. inside `[starts_at, ends_at]` (schedule)
-3. `attribute_rules` match the request context (AND of `{attribute, values}` clauses)
-4. subject's bucket `< rollout_percentage`
+1. It is **enabled**
+2. The current time is within its **schedule** window (`starts_at` → `ends_at`)
+3. The request's **audience attributes** match its targeting rules (e.g. `country = NL`)
+4. The subject's **rollout bucket** is below the percentage threshold
 
-### Rollout strategy — `abs(crc32(subject)) % 100`
+Steps 3 and 4 are optional — a flag with no rules and no percentage cap is simply on for everyone.
 
-A subject is whatever identifies a user — in the demo, a per-browser UUID stored as a cookie. CRC32 of that string maps deterministically to a bucket 0–99. If the bucket falls below the percentage threshold, the subject is in the rollout.
+### Rollout bucketing
 
-**Why CRC32**: deterministic, fast, uniform — same subject always yields the same bucket, no storage needed. Not a cryptographic hash, which is fine because flags aren't a security mechanism.
+Each user gets a stable UUID stored as a cookie. `abs(crc32(uuid)) % 100` maps that to a bucket 0–99. If the bucket is below the flag's percentage, the user is in. Same user always lands in the same bucket, no database needed.
 
-**Subject-only, not subject+flag**: the hash deliberately does **not** include the flag name. A user in bucket 17 sees every flag whose threshold is `> 17` — they're part of a stable cohort. This is right for product rollouts (gradual exposure to a beta cohort) but would be wrong for rigorous A/B testing where you need statistical independence between treatments. The simulator on the edit page makes this visual: drag the slider and you see exactly which subjects are in.
+This means a user at bucket 17 sees every flag with a threshold above 17 — they belong to a stable cohort. That's the right behaviour for a gradual rollout (everyone in the cohort gets the same experience) but not for statistically independent A/B tests. The simulator on the flag edit page makes this concrete.
 
-**In production**: subjects would be v4 UUIDs (122 bits of randomness) which distribute uniformly across the 100 buckets naturally. The synthetic 200-user grid in the admin is purely illustrative.
+### Caching
 
-## Caching
+All flags are cached together in Redis under a single key. The cache is busted automatically whenever a flag is saved or deleted. TTL is a fallback for any writes that bypass the application layer.
 
-Single Redis key (`flags:index:v2`) holds every flag. `FlagObserver` busts it on any Eloquent write so admin changes reflect on the next request. TTL (default 300s, override via `FEATURE_FLAGS_CACHE_TTL`) is a fallback for writes that bypass Eloquent — `make flush-flags` is the manual escape hatch.
+### Expired flags
 
-The cache stores plain arrays, not Eloquent models — `unserialize()` doesn't trigger the autoloader for unknown classes, which would produce `__PHP_Incomplete_Class` on the second hit. Arrays round-trip cleanly; the cache hydrates non-persisted `FeatureFlag` instances on read.
-
-## Stale-interaction handling
-
-When a user sees a feature, the flag flips off mid-session, and they try to act — the mutation endpoint re-evaluates the flag and returns **`410 Gone`** with `{"error": "feature_disabled", "flag": "..."}`. The client surfaces an inline message. 410 (not 403) because the resource existed and is no longer available.
-
-Two endpoints are gated this way via a `flag:` route middleware:
-
-- `DELETE /api/reports/bulk` — gated by `reports.bulk_actions`
-- `POST /api/reports/{id}/photos` — gated by `reports.photo_attachments`
+When a flag passes its `ends_at` date it stops being served to clients, but its `enabled` state is preserved. This keeps the history clean and lets you reopen a campaign simply by extending the expiry date. The admin shows a warning on expired flags and disables the toggle to avoid confusion.
 
 ## Demo viewer
 
-The Next.js client has no authentication; a viewer pill in the nav (`Viewing as NL · customer`) stands in for an authenticated session. Switching country or role re-evaluates flags on the next request. In production the evaluation context would come from the JWT/session.
+The client has no real auth. A pill in the nav lets you switch country and role to simulate different users — this re-evaluates flags on the next request. In production these values would come from a session or JWT.
 
 ## Seeded flags
 
-| Flag | Targeting | Rollout |
+| Flag | Who sees it | Notes |
 |---|---|---|
-| `demo.banner` | all users | 100% |
-| `reports.bulk_actions` | `role = admin` | 100% of admins |
-| `report.new_form_layout` | `country = NL` | 50% of NL users |
-| `reports.photo_attachments` | all users | 25% |
+| `demo.banner` | Everyone | Simple on/off |
+| `reports.bulk_actions` | `role = admin` | Admin-only feature |
+| `report.new_form_layout` | `country = NL`, 50% | Gradual rollout to NL |
+| `reports.photo_attachments` | Everyone, 25% | Beta feature |
+| `reports.ai_damage_estimate` | `plan = premium` | Attribute targeting |
+| `dashboard.v2` | Everyone, 20% | Scheduled — starts next week |
+| `promo.winter_2024` | Everyone | Expired — Dec 2024 campaign |
 
-## Tests
+## Tests and linting
 
 ```bash
-make test                                            # 75 Pest tests
-docker compose exec api vendor/bin/pint --dirty      # PHP style
-docker compose exec web npm run lint                 # ESLint
+make test                                        # 78 Pest tests
+docker compose exec api vendor/bin/pint --dirty  # PHP style
+docker compose exec web npm run lint             # ESLint
 ```
-
-Coverage: evaluator unit tests (all four pipeline steps, edge cases, percentage distribution), FlagCache (read-through, observer-triggered invalidation), admin Blade web flows (CRUD, validation, cache flush, redirect, nested-form regression), JSON API admin CRUD, evaluation endpoint, 410 enforcement.

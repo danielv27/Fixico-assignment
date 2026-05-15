@@ -5,6 +5,7 @@ import "./globals.css";
 import { FlagsProvider } from "@/lib/flags/context";
 import { evaluateFlags } from "@/lib/flags/server";
 import { getViewerProfile } from "@/lib/viewer/profile";
+import { SUBJECT_COOKIE } from "@/lib/viewer/constants";
 import { ViewerSwitcher } from "@/components/ViewerSwitcher";
 import { SubjectInitialiser } from "@/components/SubjectInitialiser";
 import { DemoBanner } from "@/components/DemoBanner";
@@ -18,23 +19,20 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const jar = await cookies();
-  const subject = jar.get("fixico_subject")?.value ?? "anonymous";
+  const subject = jar.get(SUBJECT_COOKIE)?.value ?? "anonymous";
   const profile = await getViewerProfile();
   const flags = await evaluateFlags({ subject, attributes: profile });
 
   return (
     <html lang="en" className="h-full">
-      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased">
         <SubjectInitialiser />
         <FlagsProvider flags={flags}>
-
-          {/* Demo banner sits above everything — including the nav */}
           <DemoBanner />
 
-          {/* Brand accent line */}
           <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
 
-          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur">
             <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
               <div className="flex items-center gap-5">
                 <Link href="/" className="group flex items-center gap-2">
@@ -45,14 +43,6 @@ export default async function RootLayout({
                   </div>
                   <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
-                <a
-                  href="http://localhost:8000/admin/flags"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
-                >
-                  Admin ↗
-                </a>
               </div>
               <ViewerSwitcher profile={profile} />
             </div>

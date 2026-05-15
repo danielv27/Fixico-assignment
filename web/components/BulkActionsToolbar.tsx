@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFlag } from "@/lib/flags/context";
-import { bulkDeleteReports } from "@/lib/api/mutations";
+import { bulkDeleteAction } from "@/app/reports/actions";
 
 type Props = { reportIds: number[] };
 
@@ -12,7 +12,6 @@ export function BulkActionsToolbar({ reportIds }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [pending, startTransition] = useTransition();
-  const [staleError, setStaleError] = useState<string | null>(null);
 
   if (!enabled) return null;
 
@@ -23,21 +22,16 @@ export function BulkActionsToolbar({ reportIds }: Props) {
   const handleDelete = () => {
     if (selected.size === 0) return;
     if (!confirm(`Delete ${selected.size} report${selected.size === 1 ? "" : "s"}? This cannot be undone.`)) return;
-    setStaleError(null);
     startTransition(async () => {
-      const result = await bulkDeleteReports([...selected]);
-      if (result.type === "feature_disabled") {
-        setStaleError("Bulk actions have been disabled. Refresh the page.");
-      } else if (result.type === "ok") {
-        setSelected(new Set());
-        router.refresh();
-      }
+      await bulkDeleteAction([...selected]);
+      setSelected(new Set());
+      router.refresh();
     });
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+    <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-zinc-700">
         <input
           type="checkbox"
           checked={allSelected}
@@ -53,7 +47,7 @@ export function BulkActionsToolbar({ reportIds }: Props) {
         <button
           onClick={handleDelete}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -62,16 +56,7 @@ export function BulkActionsToolbar({ reportIds }: Props) {
         </button>
       )}
 
-      {staleError && (
-        <span className="flex items-center gap-1.5 text-sm text-amber-600 dark:text-amber-400">
-          <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          {staleError}
-        </span>
-      )}
-
-      <span className="ml-auto text-xs font-medium text-violet-600 dark:text-violet-400">
+      <span className="ml-auto text-xs font-medium text-violet-600">
         Admin only
       </span>
     </div>
