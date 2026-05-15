@@ -22,7 +22,7 @@ seed: ## Run database seeders
 	docker compose exec api php artisan db:seed
 
 web-seed: ## Seed the Next.js SQLite database (skipped if reports already exist)
-	docker compose exec web node scripts/seed.mjs
+	docker compose exec web npx tsx scripts/seed.ts
 
 web-db-reset: ## Wipe and re-seed the Next.js SQLite database
 	docker compose exec web rm -f reports.db

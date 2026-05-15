@@ -1,9 +1,8 @@
 import Database from "better-sqlite3";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = process.env.DATABASE_PATH ?? path.join(__dirname, "..", "reports.db");
+const DB_PATH =
+  process.env.DATABASE_PATH ?? path.join(import.meta.dirname, "..", "reports.db");
 
 const db = new Database(DB_PATH);
 
@@ -21,9 +20,9 @@ db.exec(`
   )
 `);
 
-const count = db.prepare("SELECT COUNT(*) as n FROM damage_reports").get().n;
-if (count > 0) {
-  console.log(`Skipping seed — ${count} reports already exist.`);
+const row = db.prepare("SELECT COUNT(*) as n FROM damage_reports").get() as { n: number };
+if (row.n > 0) {
+  console.log(`Skipping seed — ${row.n} reports already exist.`);
   process.exit(0);
 }
 
@@ -32,14 +31,13 @@ const insert = db.prepare(`
   VALUES (?, ?, ?, ?, ?)
 `);
 
-const seed = db.transaction(() => {
+db.transaction(() => {
   insert.run("Volkswagen", "Golf",     "AB-123-CD", "Front bumper scratched against a concrete pillar in the supermarket parking lot. Paint transfer visible on the left side.", "submitted");
   insert.run("Toyota",    "Yaris",     "GH-456-IJ", "Hailstorm damage across the roof, bonnet, and left rear door. Multiple dents ranging from 1–3 cm in diameter.",           "approved");
   insert.run("BMW",       "3 Series",  "KL-789-MN", "Driver-side mirror assembly knocked off completely while parked in a narrow residential street. Housing cracked.",          "draft");
   insert.run("Renault",   "Clio",      "PQ-321-RS", "Rear-end collision at low speed. Boot lid no longer closes flush; rear bumper cracked on the right corner.",               "submitted");
   insert.run("Ford",      "Focus",     "TU-654-VW", "Keying damage running the full length of the passenger-side doors. Deep scratches through to the primer.",                 "approved");
   insert.run("Peugeot",   "208",       "XY-987-ZA", "Cracked windscreen from a stone chip that spread overnight. Crack originates at the lower-left corner and extends 30 cm.", "draft");
-});
+})();
 
-seed();
 console.log("Seeded 6 damage reports.");
