@@ -1,6 +1,3 @@
-# Day to day:    make up | make down
-# Reset:         make fresh
-
 .PHONY: help up down fresh test
 
 help: ## Show available targets
