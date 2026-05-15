@@ -30,18 +30,6 @@
                     </div>
                 </a>
 
-                <nav class="flex items-center gap-1">
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-                              {{ request()->routeIs('admin.dashboard') ? 'bg-emerald-50 text-emerald-700' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700' }}">
-                        Overview
-                    </a>
-                    <a href="{{ route('admin.feature_flags.index') }}"
-                       class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-                              {{ request()->routeIs('admin.feature_flags.*') ? 'bg-emerald-50 text-emerald-700' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700' }}">
-                        Feature flags
-                    </a>
-                </nav>
             </div>
 
         </div>

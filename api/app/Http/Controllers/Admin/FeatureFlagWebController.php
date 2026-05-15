@@ -11,13 +11,6 @@ use Illuminate\View\View;
 
 class FeatureFlagWebController extends Controller
 {
-    public function index(): View
-    {
-        $flags = FeatureFlag::query()->orderBy('name')->get();
-
-        return view('admin.feature_flags.index', compact('flags'));
-    }
-
     public function create(): View
     {
         return view('admin.feature_flags.create');
@@ -27,7 +20,7 @@ class FeatureFlagWebController extends Controller
     {
         FeatureFlag::create($request->validated());
 
-        return redirect()->route('admin.feature_flags.index')
+        return redirect()->route('admin.dashboard')
             ->with('success', 'Feature flag created.');
     }
 
@@ -40,7 +33,7 @@ class FeatureFlagWebController extends Controller
     {
         $flag->update($request->validated());
 
-        return redirect()->route('admin.feature_flags.index')
+        return redirect()->route('admin.dashboard')
             ->with('success', "'{$flag->name}' saved.");
     }
 
@@ -48,7 +41,7 @@ class FeatureFlagWebController extends Controller
     {
         $flag->delete();
 
-        return redirect()->route('admin.feature_flags.index')
+        return redirect()->route('admin.dashboard')
             ->with('success', 'Feature flag deleted.');
     }
 }
