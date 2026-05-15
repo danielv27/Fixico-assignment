@@ -21,16 +21,16 @@ export default async function RootLayout({
   const jar = await cookies();
   const subject = jar.get(SUBJECT_COOKIE)?.value ?? "anonymous";
   const profile = await getViewerProfile();
-  const flags = await evaluateFeatureFlags({ subject, attributes: profile });
+  const featureFlags = await evaluateFeatureFlags({ subject, attributes: profile });
 
   return (
     <html lang="en" className="h-full">
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased">
         <SubjectInitialiser />
-        <FeatureFlagsProvider flags={flags}>
+        <FeatureFlagsProvider flags={featureFlags}>
           <DemoBanner />
 
-          <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+          <div className="h-0.5 bg-linear-to-r from-emerald-500 via-teal-400 to-emerald-600" />
 
           <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur">
             <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
