@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useFeatureFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/feature-flags/context";
 import { savePhotosAction } from "@/app/reports/actions";
 
 type Props = { reportId: number };

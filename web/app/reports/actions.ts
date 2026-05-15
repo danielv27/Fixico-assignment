@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import db from "@/lib/db";
-import { isFeatureEnabledForCurrentUser } from "@/lib/flags/server";
+import { isFeatureEnabledForCurrentUser } from "@/lib/feature-flags/server";
 import {
   ALLOWED_STATUSES,
   bulkDeleteReports,

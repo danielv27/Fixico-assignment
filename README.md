@@ -65,7 +65,7 @@ The client has no real auth. A pill in the nav lets you switch country and role 
 | `reports.bulk_actions` | `role = admin` | Admin-only feature |
 | `form.description_first` | `country = NL`, 50% | Gradual rollout to NL |
 | `reports.photo_attachments` | Everyone, 25% | Beta feature |
-| `dashboard.v2` | Everyone, 20% | Scheduled — starts next week |
+| `reports.repair_timeline` | Everyone, 20% | Scheduled — starts next week |
 | `promo.winter_2024` | Everyone | Expired — Dec 2024 campaign |
 
 ## Conditionally rendered components

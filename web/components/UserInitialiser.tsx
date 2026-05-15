@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { USER_COOKIE } from "@/lib/viewer/constants";
+import { USER_COOKIE } from "@/lib/users/constants";
 
 export function UserInitialiser() {
   useEffect(() => {

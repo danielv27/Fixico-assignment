@@ -1,8 +1,8 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { getUserProfile } from "@/lib/viewer/profile";
-import { USER_COOKIE } from "@/lib/viewer/constants";
+import { getUserProfile } from "@/lib/users/profile";
+import { USER_COOKIE } from "@/lib/users/constants";
 import type { EvaluateRequest, EvaluateResponse, FlagDecisions } from "./types";
 
 const apiBaseUrl = process.env.API_URL ?? "http://localhost:8000";

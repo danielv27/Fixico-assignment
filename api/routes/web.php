@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\FeatureFlagWebController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
-    Route::redirect('/', '/admin/feature_flags')->name('dashboard');
+    Route::redirect('/', '/admin/feature_flags');
     Route::get('/feature_flags', [FeatureFlagWebController::class, 'index'])->name('feature_flags.index');
     Route::get('/feature_flags/create', [FeatureFlagWebController::class, 'create'])->name('feature_flags.create');
     Route::post('/feature_flags', [FeatureFlagWebController::class, 'store'])->name('feature_flags.store');

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useFeatureFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/feature-flags/context";
 import { bulkDeleteAction } from "@/app/reports/actions";
 
 type Props = { reportIds: number[] };

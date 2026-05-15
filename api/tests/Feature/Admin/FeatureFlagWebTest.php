@@ -4,7 +4,7 @@ use App\Models\FeatureFlag;
 use Illuminate\Support\Facades\Cache;
 
 it('redirects the admin root to the feature flag index', function (): void {
-    $this->get(route('admin.dashboard'))
+    $this->get('/admin')
         ->assertRedirect(route('admin.feature_flags.index'));
 });
 

@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'reports.bulk_actions'],
             [
-                'description' => 'Enables the bulk-delete toolbar on the reports list. Only visible to admin-role viewers.',
+                'description' => 'Enables the bulk-delete toolbar on the reports list. Only visible to admin users.',
                 'enabled' => true,
                 'attribute_rules' => [['attribute' => 'role', 'values' => ['admin']]],
                 'rollout_percentage' => null,
@@ -53,9 +53,9 @@ class DatabaseSeeder extends Seeder
         );
 
         FeatureFlag::query()->updateOrCreate(
-            ['name' => 'dashboard.v2'],
+            ['name' => 'reports.repair_timeline'],
             [
-                'description' => 'Redesigned dashboard with live repair-status timeline. Scheduled to roll out to 20 % starting next week.',
+                'description' => 'Repair-status timeline for report detail pages. Scheduled to roll out to 20 % starting next week.',
                 'enabled' => true,
                 'attribute_rules' => [],
                 'rollout_percentage' => 20,

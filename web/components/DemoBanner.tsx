@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useFeatureFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/feature-flags/context";
 
 export function DemoBanner() {
   const enabled = useFeatureFlag("demo.banner");

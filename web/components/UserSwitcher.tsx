@@ -1,9 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { setUserProfile, resetUser } from "@/lib/viewer/actions";
-import { COUNTRIES_OPTIONS, ROLE_OPTIONS } from "@/lib/viewer/constants";
-import type { UserProfile } from "@/lib/viewer/profile";
+import { setUserProfile, resetUser } from "@/lib/users/actions";
+import { COUNTRIES_OPTIONS, ROLE_OPTIONS } from "@/lib/users/constants";
+import type { UserProfile } from "@/lib/users/profile";
 
 type Props = { profile: UserProfile; bucket: number };
 

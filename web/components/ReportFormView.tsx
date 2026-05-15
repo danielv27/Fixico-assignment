@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { useFeatureFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/feature-flags/context";
 import { ReportForm } from "@/components/ReportForm";
 import type { DamageReport } from "@/lib/api/reports";
 import type { FormState } from "@/app/reports/actions";
