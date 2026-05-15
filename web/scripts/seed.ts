@@ -1,4 +1,4 @@
-import db from "../lib/db";
+import db from "@/lib/db";
 
 const row = db.prepare("SELECT COUNT(*) as n FROM damage_reports").get() as { n: number };
 if (row.n > 0) {
