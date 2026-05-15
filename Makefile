@@ -4,7 +4,7 @@
 # Day to day:    make up | make down
 # Reset:         make fresh
 
-.PHONY: help up down restart migrate seed web-seed web-db-reset bootstrap fresh test logs flush-flags
+.PHONY: help up down migrate seed web-seed web-db-reset bootstrap fresh test logs flush-flags
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -14,9 +14,6 @@ up:  ## Start the stack
 
 down: ## Stop the stack
 	docker compose down
-
-restart: ## Apply changes (recreate containers if config or env changed)
-	docker compose up -d
 
 migrate: ## Run pending migrations
 	docker compose exec api php artisan migrate

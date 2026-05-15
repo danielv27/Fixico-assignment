@@ -22,8 +22,6 @@ services:
       POSTGRES_DB: fixico_assignment
       POSTGRES_USER: fixico
       POSTGRES_PASSWORD: fixico
-    ports:
-      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -34,8 +32,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:
