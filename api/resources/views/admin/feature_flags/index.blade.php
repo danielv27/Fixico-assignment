@@ -125,11 +125,15 @@
 
                             {{-- Status (reactive) --}}
                             <td class="px-5 py-4">
-                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-                                      :class="statusFor(flag).cls">
-                                    <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" :class="statusFor(flag).dot"></span>
-                                    <span x-text="statusFor(flag).label"></span>
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+                                          :class="statusFor(flag).cls">
+                                        <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" :class="statusFor(flag).dot"></span>
+                                        <span x-text="statusFor(flag).label"></span>
+                                    </span>
+                                    <span x-show="statusFor(flag).date" x-text="statusFor(flag).date"
+                                          class="text-xs text-zinc-400 whitespace-nowrap"></span>
+                                </div>
                             </td>
 
                             {{-- Toggle --}}
@@ -210,23 +214,21 @@ function flagTable(flags) {
             const now = new Date();
             const startsAt = flag.starts_at ? new Date(flag.starts_at) : null;
             const endsAt   = flag.ends_at   ? new Date(flag.ends_at)   : null;
+            const fmt = (d) => d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
 
             if (!flag.enabled) {
-                return { label: 'Disabled',  cls: 'bg-zinc-100 text-zinc-500 ring-zinc-200/80',       dot: 'bg-zinc-400',   order: 0 };
+                return { label: 'Disabled',  date: null,                          cls: 'bg-zinc-100 text-zinc-500 ring-zinc-200/80',            dot: 'bg-zinc-400',   order: 0 };
             }
             if (endsAt && now > endsAt) {
-                const d = endsAt.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-                return { label: `Expired · ${d}`,       cls: 'bg-red-50 text-red-600 ring-red-200/80',         dot: 'bg-red-400',    order: 1 };
+                return { label: 'Expired',   date: fmt(endsAt),                   cls: 'bg-red-50 text-red-600 ring-red-200/80',                dot: 'bg-red-400',    order: 1 };
             }
             if (startsAt && now < startsAt) {
-                const d = startsAt.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-                return { label: `Scheduled · ${d}`,     cls: 'bg-blue-50 text-blue-700 ring-blue-200/80',      dot: 'bg-blue-400',   order: 2 };
+                return { label: 'Scheduled', date: 'from ' + fmt(startsAt),       cls: 'bg-blue-50 text-blue-700 ring-blue-200/80',             dot: 'bg-blue-400',   order: 2 };
             }
             if (endsAt) {
-                const d = endsAt.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-                return { label: `Active · ends ${d}`,   cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200/80', dot: 'bg-emerald-500', order: 3 };
+                return { label: 'Active',    date: 'until ' + fmt(endsAt),        cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200/80',    dot: 'bg-emerald-500', order: 3 };
             }
-            return { label: 'Active', cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200/80', dot: 'bg-emerald-500', order: 4 };
+            return     { label: 'Active',    date: null,                          cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200/80',    dot: 'bg-emerald-500', order: 4 };
         },
 
         async toggle(flag) {
