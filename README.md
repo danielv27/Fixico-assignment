@@ -1,26 +1,25 @@
 # Fixico Feature Flag Service
 
-A take-home assignment. Laravel handles the feature flag admin and evaluation API. Next.js is the client app — a car damage report tool that exercises the flags in practice.
+- Feature flag admin panel and evaluation API built in Laravel.
+- Client app that demonstrates conditional flag rendering in Next.js.
 
 ## Running locally
 
 ```bash
-docker compose up --build
-
-# Optional convenience wrappers
-make bootstrap   # build and start in the background
-make up          # subsequent starts
-make down        # stop
-make fresh       # wipe all data and start clean
+make up    # Start docker containers
+make down  # Stop docker containers
+make test  # Test
+make fresh # Reset DBs (Restarts and wipes volumes)
 ```
 
 | URL | What |
 |---|---|
+| http://localhost:8000/admin | Admin Panel |
 | http://localhost:3001 | Next.js client |
-| http://localhost:8000/admin | Flag admin |
+
 
 ## How it's structured
-
+The project is a mono repo with the folloing components:
 ```
 api/   Laravel — flag management UI, evaluation endpoint
 web/   Next.js — damage reports client
@@ -57,6 +56,8 @@ When a flag passes its `ends_at` date it stops being served to clients, but its 
 
 The client has no real auth. A pill in the nav lets you switch country and role to simulate different users — this re-evaluates flags on the next request. In production these values would come from a session or JWT.
 
+The same control shows the user's rollout bucket (`0`–`99`). The frontend mirrors the API's `crc32(user_id) % 100` calculation so the demo can show why a user does or does not land in percentage-based flags. Re-rolling creates a new demo user id and therefore a new bucket.
+
 ## Seeded flags
 
 | Flag | Who sees it | Notes |
@@ -77,13 +78,9 @@ The client has no real auth. A pill in the nav lets you switch country and role 
 | `form.description_first` | `ReportFormView` | `country = NL`, 50% rollout | Reorders the new and edit report forms to show damage description first |
 | `reports.photo_attachments` | `PhotoAttachments` | Everyone, 25% rollout | Photo documentation section on the report detail page |
 
-The live Next.js server actions re-check their feature flag immediately before mutating report data, so a stale rendered control becomes a no-op with an inline error if the flag was disabled after the page loaded. Laravel stays focused on feature flag management and evaluation; report storage and report mutations live in the Next.js app.
-
-## Tests and linting
+## Running linters
 
 ```bash
-make test                                        # Pest test suite
 docker compose exec api vendor/bin/pint --dirty  # PHP style
 docker compose exec web npm run lint             # ESLint
-docker compose exec web npm run build            # Next.js production build
 ```
