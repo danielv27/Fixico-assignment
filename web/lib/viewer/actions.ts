@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { VIEWER_COOKIE, type ViewerProfile } from "./profile";
-import { COUNTRIES_OPTIONS, ROLE_OPTIONS } from "./constants";
+import { COUNTRIES_OPTIONS, ROLE_OPTIONS, SUBJECT_COOKIE } from "./constants";
 
 export async function setViewerProfile(formData: FormData): Promise<void> {
   const country = formData.get("country")?.toString() ?? "NL";
@@ -19,6 +19,18 @@ export async function setViewerProfile(formData: FormData): Promise<void> {
     path: "/",
     httpOnly: false,
     maxAge: 60 * 60 * 24 * 30,
+    sameSite: "lax",
+  });
+
+  revalidatePath("/", "layout");
+}
+
+export async function resetSubject(): Promise<void> {
+  const jar = await cookies();
+  jar.set(SUBJECT_COOKIE, crypto.randomUUID(), {
+    path: "/",
+    httpOnly: false,
+    maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   });
 

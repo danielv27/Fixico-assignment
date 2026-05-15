@@ -6,6 +6,7 @@ import { FeatureFlagsProvider } from "@/lib/flags/context";
 import { evaluateFeatureFlags } from "@/lib/flags/server";
 import { getViewerProfile } from "@/lib/viewer/profile";
 import { SUBJECT_COOKIE } from "@/lib/viewer/constants";
+import { rolloutBucket } from "@/lib/viewer/bucket";
 import { ViewerSwitcher } from "@/components/ViewerSwitcher";
 import { SubjectInitialiser } from "@/components/SubjectInitialiser";
 import { DemoBanner } from "@/components/DemoBanner";
@@ -22,6 +23,7 @@ export default async function RootLayout({
   const subject = jar.get(SUBJECT_COOKIE)?.value ?? "anonymous";
   const profile = await getViewerProfile();
   const featureFlags = await evaluateFeatureFlags({ subject, attributes: profile });
+  const bucket = rolloutBucket(subject);
 
   return (
     <html lang="en" className="h-full">
@@ -44,7 +46,7 @@ export default async function RootLayout({
                   <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
               </div>
-              <ViewerSwitcher profile={profile} />
+              <ViewerSwitcher profile={profile} bucket={bucket} />
             </div>
           </header>
 

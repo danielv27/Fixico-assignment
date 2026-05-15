@@ -12,11 +12,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ------------------------------------------------------------------ //
         // Feature flags
-        // ------------------------------------------------------------------ //
 
-        // Slice 1 sanity-check — visible to everyone
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'demo.banner'],
             [
@@ -27,8 +24,6 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // Conditional component #1: bulk-actions toolbar
-        // Targeting: role = admin (switch the viewer to "admin" to see it)
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'reports.bulk_actions'],
             [
@@ -39,8 +34,6 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // Conditional component #3: new report form banner
-        // Targeting: country = NL, 50 % of those users
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'report.new_form_layout'],
             [
@@ -51,8 +44,6 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // Conditional component #2: photo attachments section
-        // Targeting: all users, 25 % rollout (try different subject cookies)
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'reports.photo_attachments'],
             [
@@ -63,7 +54,6 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // Scheduled: new dashboard — starts next week, 20 % rollout
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'dashboard.v2'],
             [
@@ -76,7 +66,6 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // Expired: Winter 2024 promo — campaign closed Dec 2024
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'promo.winter_2024'],
             [
@@ -89,9 +78,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // ------------------------------------------------------------------ //
         // Demo damage reports
-        // ------------------------------------------------------------------ //
 
         if (DamageReport::query()->count() === 0) {
             DamageReport::factory()->create([

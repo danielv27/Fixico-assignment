@@ -4,7 +4,7 @@
 # Day to day:    make up | make down
 # Reset:         make fresh
 
-.PHONY: help up down migrate seed bootstrap fresh test logs flush-flags
+.PHONY: help up down migrate seed bootstrap test
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -18,22 +18,11 @@ down: ## Stop the stack
 migrate: ## Run pending migrations
 	docker compose exec api php artisan migrate
 
-seed: ## Seed all databases (API + web)
+seed: ## Seed databases (FeatureFlag API + Web app damage reports)
 	docker compose exec api php artisan db:seed
 	docker compose exec web npx tsx scripts/seed.ts
 
 bootstrap: up migrate seed ## First-time setup: start, migrate, seed
 
-fresh: ## Wipe all data and re-seed (API DB + web SQLite)
-	docker compose down -v
-	docker compose exec web rm -f reports.db
-	$(MAKE) up migrate seed
-
 test: ## Run the API test suite
 	docker compose exec api php artisan test
-
-logs: ## Tail logs from every service
-	docker compose logs -f
-
-flush-flags: ## Invalidate the flag cache (use after editing flags directly in the DB)
-	docker compose exec api php artisan cache:forget flags:index:v2

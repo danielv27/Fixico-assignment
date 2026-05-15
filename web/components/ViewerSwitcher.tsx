@@ -1,13 +1,13 @@
 "use client";
 
 import { useTransition } from "react";
-import { setViewerProfile } from "@/lib/viewer/actions";
+import { setViewerProfile, resetSubject } from "@/lib/viewer/actions";
 import { COUNTRIES_OPTIONS, ROLE_OPTIONS } from "@/lib/viewer/constants";
 import type { ViewerProfile } from "@/lib/viewer/profile";
 
-type Props = { profile: ViewerProfile };
+type Props = { profile: ViewerProfile; bucket: number };
 
-export function ViewerSwitcher({ profile }: Props) {
+export function ViewerSwitcher({ profile, bucket }: Props) {
   const [pending, startTransition] = useTransition();
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -58,6 +58,24 @@ export function ViewerSwitcher({ profile }: Props) {
             </option>
           ))}
         </select>
+
+        <span className="text-zinc-300">·</span>
+
+        <button
+          type="button"
+          onClick={() => startTransition(() => resetSubject())}
+          disabled={pending}
+          title="Re-roll rollout bucket"
+          className="flex items-center gap-1 font-semibold text-zinc-500 transition-colors hover:text-zinc-800 disabled:opacity-40"
+        >
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="17 1 21 5 17 9" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <polyline points="7 23 3 19 7 15" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+          </svg>
+          <span>bucket <span className="tabular-nums text-zinc-800">{bucket}</span></span>
+        </button>
       </form>
 
       <div className="group relative">
@@ -80,10 +98,10 @@ export function ViewerSwitcher({ profile }: Props) {
             Demo viewer context
           </p>
           <p className="mt-1 leading-relaxed">
-            Simulates who is using the app — stands in for a real auth
-            session. Flip country or role to exercise flag targeting rules
-            (e.g. <code className="font-mono">country=NL</code> unlocks the
-            new report layout).
+            Simulates who is using the app — stands in for a real auth session.
+            Flip country or role to exercise attribute-based targeting. The
+            bucket number (0–99) determines which percentage-gated flags you
+            see — shuffle to land in a different one.
           </p>
           <p className="mt-1.5 text-zinc-400">
             This control exists only in this demo.
