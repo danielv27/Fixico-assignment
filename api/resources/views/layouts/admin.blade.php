@@ -44,9 +44,6 @@
                 </nav>
             </div>
 
-            <a href="http://localhost:3001" class="text-xs text-zinc-400 transition-colors hover:text-zinc-600">
-                ← Client app
-            </a>
         </div>
     </header>
 

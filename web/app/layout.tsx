@@ -42,14 +42,6 @@ export default async function RootLayout({
                   </div>
                   <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
-                <a
-                  href="http://localhost:8000/admin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600"
-                >
-                  Admin ↗
-                </a>
               </div>
               <ViewerSwitcher profile={profile} />
             </div>
