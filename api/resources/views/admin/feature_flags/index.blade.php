@@ -122,14 +122,16 @@
                                 </span>
                             </td>
 
+                            @php $isExpired = $flag->ends_at !== null && now()->isAfter($flag->ends_at); @endphp
                             <td class="px-5 py-4 text-center"
-                                x-data="inlineToggle({{ $flag->id }}, {{ $flag->enabled ? 'true' : 'false' }})">
+                                x-data="inlineToggle({{ $flag->id }}, {{ $flag->enabled ? 'true' : 'false' }}, {{ $isExpired ? 'true' : 'false' }})">
                                 <button type="button"
                                         @click="toggle()"
-                                        :disabled="loading"
-                                        :aria-label="enabled ? 'Disable' : 'Enable'"
-                                        class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-wait disabled:opacity-60"
-                                        :class="enabled ? 'bg-emerald-500' : 'bg-zinc-300'">
+                                        :disabled="loading || expired"
+                                        :aria-label="expired ? 'Expired' : (enabled ? 'Disable' : 'Enable')"
+                                        :title="expired ? 'Expired flags cannot be toggled' : ''"
+                                        class="relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed"
+                                        :class="expired ? 'bg-zinc-200 opacity-40' : (enabled ? 'bg-emerald-500 cursor-pointer' : 'bg-zinc-300 cursor-pointer')">
                                     <span class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
                                           :class="enabled ? 'translate-x-4' : 'translate-x-0'"></span>
                                 </button>
@@ -152,11 +154,13 @@
     @endif
 
 <script>
-function inlineToggle(id, initial) {
+function inlineToggle(id, initial, expired) {
     return {
         enabled: initial,
+        expired: expired,
         loading: false,
         async toggle() {
+            if (this.expired) return;
             this.loading = true;
             try {
                 const res = await fetch(`/api/admin/feature_flags/${id}`, {

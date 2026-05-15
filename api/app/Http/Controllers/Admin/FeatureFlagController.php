@@ -31,9 +31,15 @@ class FeatureFlagController extends Controller
         return new FeatureFlagResource($flag);
     }
 
-    public function update(UpdateFeatureFlagRequest $request, FeatureFlag $flag): FeatureFlagResource
+    public function update(UpdateFeatureFlagRequest $request, FeatureFlag $flag): JsonResponse|FeatureFlagResource
     {
-        $flag->update($request->validated());
+        $data = $request->validated();
+
+        if (array_key_exists('enabled', $data) && $flag->ends_at !== null && now()->isAfter($flag->ends_at)) {
+            return response()->json(['message' => 'Expired flags cannot be toggled.'], 422);
+        }
+
+        $flag->update($data);
 
         return new FeatureFlagResource($flag);
     }
