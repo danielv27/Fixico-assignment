@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 import type { DamageReport, ReportStatus } from "@/lib/api/reports";
 import type { FormState } from "@/app/reports/actions";
 
@@ -8,6 +8,7 @@ type Props = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   initial?: DamageReport;
   submitLabel: string;
+  children?: ReactNode;
 };
 
 const STATUS_OPTIONS: { value: ReportStatus; label: string; description: string }[] = [
@@ -16,7 +17,7 @@ const STATUS_OPTIONS: { value: ReportStatus; label: string; description: string 
   { value: "approved", label: "Approved", description: "Assessment approved" },
 ];
 
-export function ReportForm({ action, initial, submitLabel }: Props) {
+export function ReportForm({ action, initial, submitLabel, children }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
@@ -103,6 +104,8 @@ export function ReportForm({ action, initial, submitLabel }: Props) {
           )}
         </fieldset>
       )}
+
+      {children}
 
       <div className="flex items-center gap-3">
         <button

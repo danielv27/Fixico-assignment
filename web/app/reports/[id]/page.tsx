@@ -79,11 +79,9 @@ export default async function ReportDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <ReportForm action={action} initial={report} submitLabel="Save changes" />
-
-      <div className="mt-8">
+      <ReportForm action={action} initial={report} submitLabel="Save changes">
         <PhotoAttachments reportId={reportId} />
-      </div>
+      </ReportForm>
     </main>
   );
 }
