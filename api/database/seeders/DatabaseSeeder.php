@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\DamageReports\ReportStatus;
 use App\Models\DamageReport;
 use App\Models\FeatureFlag;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -59,6 +60,32 @@ class DatabaseSeeder extends Seeder
                 'enabled' => true,
                 'attribute_rules' => [],
                 'rollout_percentage' => 25,
+            ],
+        );
+
+        // Scheduled: new dashboard — starts next week, 20 % rollout
+        FeatureFlag::query()->updateOrCreate(
+            ['name' => 'dashboard.v2'],
+            [
+                'description' => 'Redesigned dashboard with live repair-status timeline. Scheduled to roll out to 20 % starting next week.',
+                'enabled' => true,
+                'attribute_rules' => [],
+                'rollout_percentage' => 20,
+                'starts_at' => now()->addDays(7),
+                'ends_at' => null,
+            ],
+        );
+
+        // Expired: Winter 2024 promo — campaign closed Dec 2024
+        FeatureFlag::query()->updateOrCreate(
+            ['name' => 'promo.winter_2024'],
+            [
+                'description' => '15 % discount on repair bookings for the Winter 2024 campaign.',
+                'enabled' => true,
+                'attribute_rules' => [],
+                'rollout_percentage' => null,
+                'starts_at' => Carbon::parse('2024-12-01'),
+                'ends_at' => Carbon::parse('2024-12-31'),
             ],
         );
 
