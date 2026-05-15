@@ -15,9 +15,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction
+RUN composer install --no-interaction --prefer-dist --no-scripts --no-autoloader
 
 COPY . .
-RUN composer dump-autoload --optimize
+RUN composer dump-autoload --optimize \
+    && cp .env.example .env \
+    && php artisan key:generate
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
