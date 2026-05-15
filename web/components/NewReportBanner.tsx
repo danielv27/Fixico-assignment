@@ -1,9 +1,9 @@
 "use client";
 
-import { useFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/flags/context";
 
 export function NewReportBanner() {
-  const enabled = useFlag("report.new_form_layout");
+  const enabled = useFeatureFlag("report.new_form_layout");
   if (!enabled) return null;
 
   return (

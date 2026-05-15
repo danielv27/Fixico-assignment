@@ -3,22 +3,22 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { FlagDecisions } from "./types";
 
-const FlagsContext = createContext<FlagDecisions | null>(null);
+const FeatureFlagsContext = createContext<FlagDecisions | null>(null);
 
-export function FlagsProvider({
+export function FeatureFlagsProvider({
   flags,
   children,
 }: {
   flags: FlagDecisions;
   children: ReactNode;
 }) {
-  return <FlagsContext value={flags}>{children}</FlagsContext>;
+  return <FeatureFlagsContext value={flags}>{children}</FeatureFlagsContext>;
 }
 
-export function useFlag(name: string): boolean {
-  const flags = useContext(FlagsContext);
+export function useFeatureFlag(name: string, defaultValue = false): boolean {
+  const flags = useContext(FeatureFlagsContext);
   if (flags === null) {
-    throw new Error("useFlag must be used inside <FlagsProvider>");
+    throw new Error("useFeatureFlag must be used inside <FeatureFlagsProvider>");
   }
-  return flags[name] ?? false;
+  return flags[name] ?? defaultValue;
 }

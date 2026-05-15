@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/flags/context";
 
 export function DemoBanner() {
-  const enabled = useFlag("demo.banner");
+  const enabled = useFeatureFlag("demo.banner");
   const [dismissed, setDismissed] = useState(false);
 
   if (!enabled || dismissed) return null;

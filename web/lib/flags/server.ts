@@ -14,7 +14,7 @@ const apiBaseUrl = process.env.API_URL ?? "http://localhost:8000";
  * tradeoff: a broken flag service makes everything look turned off, which is
  * the safer default for a UI that's already coupled to a flag's existence.
  */
-export async function evaluateFlags(
+export async function evaluateFeatureFlags(
   request: EvaluateRequest,
 ): Promise<FlagDecisions> {
   try {
@@ -30,7 +30,7 @@ export async function evaluateFlags(
 
     if (!response.ok) {
       console.error(
-        `[flags] evaluate failed: ${response.status} ${response.statusText}`,
+        `[feature-flags] evaluate failed: ${response.status} ${response.statusText}`,
       );
       return {};
     }
@@ -38,7 +38,7 @@ export async function evaluateFlags(
     const payload = (await response.json()) as EvaluateResponse;
     return payload.flags;
   } catch (error) {
-    console.error("[flags] evaluate threw:", error);
+    console.error("[feature-flags] evaluate threw:", error);
     return {};
   }
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { useFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/flags/context";
 import { savePhotosAction } from "@/app/reports/actions";
 
 type Props = { reportId: number };
 
 export function PhotoAttachments({ reportId }: Props) {
-  const enabled = useFlag("reports.photo_attachments");
+  const enabled = useFeatureFlag("reports.photo_attachments");
   const [urls, setUrls] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);

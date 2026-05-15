@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
-import { FlagsProvider } from "@/lib/flags/context";
-import { evaluateFlags } from "@/lib/flags/server";
+import { FeatureFlagsProvider } from "@/lib/flags/context";
+import { evaluateFeatureFlags } from "@/lib/flags/server";
 import { getViewerProfile } from "@/lib/viewer/profile";
 import { SUBJECT_COOKIE } from "@/lib/viewer/constants";
 import { ViewerSwitcher } from "@/components/ViewerSwitcher";
@@ -21,13 +21,13 @@ export default async function RootLayout({
   const jar = await cookies();
   const subject = jar.get(SUBJECT_COOKIE)?.value ?? "anonymous";
   const profile = await getViewerProfile();
-  const flags = await evaluateFlags({ subject, attributes: profile });
+  const flags = await evaluateFeatureFlags({ subject, attributes: profile });
 
   return (
     <html lang="en" className="h-full">
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased">
         <SubjectInitialiser />
-        <FlagsProvider flags={flags}>
+        <FeatureFlagsProvider flags={flags}>
           <DemoBanner />
 
           <div className="h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
@@ -51,7 +51,7 @@ export default async function RootLayout({
           <div className="flex flex-1 flex-col">
             {children}
           </div>
-        </FlagsProvider>
+        </FeatureFlagsProvider>
       </body>
     </html>
   );

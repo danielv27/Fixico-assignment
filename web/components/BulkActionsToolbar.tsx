@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useFlag } from "@/lib/flags/context";
+import { useFeatureFlag } from "@/lib/flags/context";
 import { bulkDeleteAction } from "@/app/reports/actions";
 
 type Props = { reportIds: number[] };
 
 export function BulkActionsToolbar({ reportIds }: Props) {
-  const enabled = useFlag("reports.bulk_actions");
+  const enabled = useFeatureFlag("reports.bulk_actions");
   const router = useRouter();
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [pending, startTransition] = useTransition();
