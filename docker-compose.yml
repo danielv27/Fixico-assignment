@@ -1,6 +1,8 @@
 services:
   api:
     build: ./api
+    volumes:
+      - ./api/vendor:/var/www/html/vendor
     ports:
       - "8000:8000"
     depends_on:

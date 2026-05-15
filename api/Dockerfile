@@ -14,12 +14,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --no-scripts --no-autoloader
-
 COPY . .
-RUN composer dump-autoload --optimize \
-    && cp .env.example .env \
-    && php artisan key:generate
 
+COPY --chmod=0755 entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
