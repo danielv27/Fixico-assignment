@@ -8,7 +8,6 @@ import { getUserProfile } from "@/lib/users/profile";
 import { USER_COOKIE } from "@/lib/users/constants";
 import { rolloutBucket } from "@/lib/users/bucket";
 import { UserSwitcher } from "@/components/UserSwitcher";
-import { UserInitialiser } from "@/components/UserInitialiser";
 import { DemoBanner } from "@/components/DemoBanner";
 
 export const metadata: Metadata = {
@@ -28,7 +27,6 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased">
-        <UserInitialiser />
         <FeatureFlagsProvider flags={featureFlags}>
           <DemoBanner />
 
