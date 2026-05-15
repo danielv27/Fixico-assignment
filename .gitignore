@@ -34,7 +34,8 @@ _ide_helper.php
 **/.vercel/
 **/*.tsbuildinfo
 
-# Laravel runtime caches and storage (recreated by Docker build / Laravel at runtime)
+# Laravel runtime caches and storage
+/api/bootstrap/cache/
 /api/storage/
 /api/public/build
 /api/public/hot
