@@ -8,8 +8,7 @@ const apiBaseUrl = process.env.INTERNAL_API_BASE_URL ?? "http://localhost:8000";
  * Server-side flag evaluation.
  *
  * Called from RSC pages/layouts, which run inside the web container and reach
- * the API over the docker network. The browser never sees this URL — public
- * (browser-side) calls go through NEXT_PUBLIC_API_BASE_URL on a different code path.
+ * the API over the internal docker network via INTERNAL_API_BASE_URL.
  *
  * Failures degrade to "no flags enabled" rather than crashing the page. The
  * tradeoff: a broken flag service makes everything look turned off, which is

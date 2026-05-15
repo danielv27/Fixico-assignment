@@ -10,7 +10,6 @@ services:
   web:
     build: ./web
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
       INTERNAL_API_BASE_URL: http://api:8000
     ports:
       - "3001:3000"
