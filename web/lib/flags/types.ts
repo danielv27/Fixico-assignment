@@ -1,7 +1,7 @@
 export type FlagDecisions = Record<string, boolean>;
 
 export type EvaluateRequest = {
-  subject: string;
+  user_id: string;
   attributes?: Record<string, string>;
 };
 

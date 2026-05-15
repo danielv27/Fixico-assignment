@@ -15,7 +15,7 @@ class EvaluateFeatureFlagsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'subject' => ['required', 'string', 'max:255'],
+            'user_id' => ['required', 'string', 'max:255'],
             'attributes' => ['array'],
             'attributes.*' => ['string', 'max:255'],
         ];
@@ -24,7 +24,7 @@ class EvaluateFeatureFlagsRequest extends FormRequest
     public function context(): EvaluationContext
     {
         return new EvaluationContext(
-            subject: $this->string('subject')->toString(),
+            subject: $this->string('user_id')->toString(),
             attributes: $this->array('attributes'),
         );
     }

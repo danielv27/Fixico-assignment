@@ -5,7 +5,7 @@ namespace App\FeatureFlags;
 /**
  * Immutable evaluation context: who is being evaluated, with what attributes.
  *
- * Slice 1 only uses the subject. Attributes ride along for later slices so
+ * Slice 1 only uses the user ID. Attributes ride along for later slices so
  * the public API contract doesn't change as targeting capabilities grow.
  */
 final readonly class EvaluationContext

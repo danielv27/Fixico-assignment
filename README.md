@@ -50,7 +50,7 @@ All flags are cached together in Redis under a single key. The cache is busted a
 
 When a flag passes its `ends_at` date it stops being served to clients, but its `enabled` state is preserved. This keeps the history clean and lets you reopen a campaign simply by extending the expiry date. The admin shows a warning on expired flags and disables the toggle to avoid confusion.
 
-## Demo viewer
+## Demo User
 
 The client has no real auth. A pill in the nav lets you switch country and role to simulate different users — this re-evaluates flags on the next request. In production these values would come from a session or JWT.
 

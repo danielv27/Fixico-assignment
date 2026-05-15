@@ -4,11 +4,11 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { FeatureFlagsProvider } from "@/lib/flags/context";
 import { evaluateFeatureFlags } from "@/lib/flags/server";
-import { getViewerProfile } from "@/lib/viewer/profile";
-import { SUBJECT_COOKIE } from "@/lib/viewer/constants";
+import { getUserProfile } from "@/lib/viewer/profile";
+import { USER_COOKIE } from "@/lib/viewer/constants";
 import { rolloutBucket } from "@/lib/viewer/bucket";
-import { ViewerSwitcher } from "@/components/ViewerSwitcher";
-import { SubjectInitialiser } from "@/components/SubjectInitialiser";
+import { UserSwitcher } from "@/components/UserSwitcher";
+import { UserInitialiser } from "@/components/UserInitialiser";
 import { DemoBanner } from "@/components/DemoBanner";
 
 export const metadata: Metadata = {
@@ -20,15 +20,15 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const jar = await cookies();
-  const subject = jar.get(SUBJECT_COOKIE)?.value ?? "anonymous";
-  const profile = await getViewerProfile();
-  const featureFlags = await evaluateFeatureFlags({ subject, attributes: profile });
-  const bucket = rolloutBucket(subject);
+  const userId = jar.get(USER_COOKIE)?.value ?? "anonymous";
+  const profile = await getUserProfile();
+  const featureFlags = await evaluateFeatureFlags({ user_id: userId, attributes: profile });
+  const bucket = rolloutBucket(userId);
 
   return (
     <html lang="en" className="h-full">
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 antialiased">
-        <SubjectInitialiser />
+        <UserInitialiser />
         <FeatureFlagsProvider flags={featureFlags}>
           <DemoBanner />
 
@@ -46,7 +46,7 @@ export default async function RootLayout({
                   <span className="text-sm font-bold tracking-tight">Fixico</span>
                 </Link>
               </div>
-              <ViewerSwitcher profile={profile} bucket={bucket} />
+              <UserSwitcher profile={profile} bucket={bucket} />
             </div>
           </header>
 

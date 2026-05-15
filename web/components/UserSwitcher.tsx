@@ -1,20 +1,20 @@
 "use client";
 
 import { useTransition } from "react";
-import { setViewerProfile, resetSubject } from "@/lib/viewer/actions";
+import { setUserProfile, resetUser } from "@/lib/viewer/actions";
 import { COUNTRIES_OPTIONS, ROLE_OPTIONS } from "@/lib/viewer/constants";
-import type { ViewerProfile } from "@/lib/viewer/profile";
+import type { UserProfile } from "@/lib/viewer/profile";
 
-type Props = { profile: ViewerProfile; bucket: number };
+type Props = { profile: UserProfile; bucket: number };
 
-export function ViewerSwitcher({ profile, bucket }: Props) {
+export function UserSwitcher({ profile, bucket }: Props) {
   const [pending, startTransition] = useTransition();
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const form = e.currentTarget.closest("form");
     if (!form) return;
     startTransition(async () => {
-      await setViewerProfile(new FormData(form));
+      await setUserProfile(new FormData(form));
     });
   }
 
@@ -63,7 +63,7 @@ export function ViewerSwitcher({ profile, bucket }: Props) {
 
         <button
           type="button"
-          onClick={() => startTransition(() => resetSubject())}
+          onClick={() => startTransition(() => resetUser())}
           disabled={pending}
           title="Re-roll rollout bucket"
           className="flex items-center gap-1 font-semibold text-zinc-500 transition-colors hover:text-zinc-800 disabled:opacity-40"
@@ -82,7 +82,7 @@ export function ViewerSwitcher({ profile, bucket }: Props) {
         <button
           type="button"
           className="flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600"
-          aria-label="About demo viewer"
+          aria-label="About demo user"
         >
           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -95,7 +95,7 @@ export function ViewerSwitcher({ profile, bucket }: Props) {
 
         <div className="pointer-events-none absolute right-0 top-7 z-50 w-64 rounded-lg border border-zinc-200 bg-white p-3 text-xs text-zinc-600 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
           <p className="font-semibold text-zinc-800">
-            Demo viewer context
+            Demo user context
           </p>
           <p className="mt-1 leading-relaxed">
             Simulates who is using the app — stands in for a real auth session.

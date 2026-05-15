@@ -17,6 +17,6 @@ function crc32(str: string): number {
   return (crc ^ -1) >>> 0; // unsigned, matching 64-bit PHP where crc32() never returns negative
 }
 
-export function rolloutBucket(subject: string): number {
-  return crc32(subject) % 100;
+export function rolloutBucket(userId: string): number {
+  return crc32(userId) % 100;
 }

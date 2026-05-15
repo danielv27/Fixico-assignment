@@ -43,7 +43,7 @@ class RequireFeatureFlag
     private function contextFrom(Request $request): EvaluationContext
     {
         return new EvaluationContext(
-            subject: $request->input('subject', 'anonymous'),
+            subject: $request->input('user_id', 'anonymous'),
             attributes: $request->input('attributes', []),
         );
     }
