@@ -15,21 +15,21 @@ it('lists flags ordered by name', function (): void {
 
 it('creates a flag', function (): void {
     $this->postJson('/api/admin/feature_flags', [
-        'name' => 'reports.bulk_delete',
-        'description' => 'Enables bulk deletion.',
+        'name' => 'reports.bulk_actions',
+        'description' => 'Enables bulk actions.',
         'enabled' => false,
     ])->assertCreated()
-        ->assertJsonPath('data.name', 'reports.bulk_delete')
+        ->assertJsonPath('data.name', 'reports.bulk_actions')
         ->assertJsonPath('data.enabled', false);
 
-    $this->assertDatabaseHas('feature_flags', ['name' => 'reports.bulk_delete']);
+    $this->assertDatabaseHas('feature_flags', ['name' => 'reports.bulk_actions']);
 });
 
 it('rejects a duplicate flag name', function (): void {
-    FeatureFlag::factory()->create(['name' => 'reports.bulk_delete']);
+    FeatureFlag::factory()->create(['name' => 'reports.bulk_actions']);
 
     $this->postJson('/api/admin/feature_flags', [
-        'name' => 'reports.bulk_delete',
+        'name' => 'reports.bulk_actions',
         'enabled' => true,
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['name']);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { DamageReport } from "@/lib/api/reports";
+import type { DamageReport } from "@/lib/reports/repository";
 
 const STATUS_CONFIG: Record<
   DamageReport["status"],

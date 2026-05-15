@@ -13,7 +13,7 @@ import {
   type ReportInput,
   type ReportStatus,
   type ValidationErrors,
-} from "@/lib/api/reports";
+} from "@/lib/reports/repository";
 
 export type FormState = {
   errors?: ValidationErrors;

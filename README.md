@@ -77,12 +77,7 @@ The client has no real auth. A pill in the nav lets you switch country and role 
 | `form.description_first` | `ReportFormView` | `country = NL`, 50% rollout | Reorders the new and edit report forms to show damage description first |
 | `reports.photo_attachments` | `PhotoAttachments` | Everyone, 25% rollout | Photo documentation section on the report detail page |
 
-The live Next.js server actions re-check their feature flag immediately before mutating data, so a stale rendered control becomes a no-op with an inline error if the flag was disabled after the page loaded. Matching Laravel API endpoints are also feature-gated and return `410 Gone` when their flag is off:
-
-| Flag | Endpoint |
-|---|---|
-| `reports.bulk_actions` | `DELETE /api/reports/bulk` |
-| `reports.photo_attachments` | `POST /api/reports/{id}/photos` |
+The live Next.js server actions re-check their feature flag immediately before mutating report data, so a stale rendered control becomes a no-op with an inline error if the flag was disabled after the page loaded. Laravel stays focused on feature flag management and evaluation; report storage and report mutations live in the Next.js app.
 
 ## Tests and linting
 

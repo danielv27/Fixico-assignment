@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\DamageReports\ReportStatus;
-use App\Models\DamageReport;
 use App\Models\FeatureFlag;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -75,33 +73,5 @@ class DatabaseSeeder extends Seeder
                 'ends_at' => Carbon::parse('2024-12-31'),
             ],
         );
-
-        // Demo damage reports
-
-        if (DamageReport::query()->count() === 0) {
-            DamageReport::factory()->create([
-                'vehicle_make' => 'Volkswagen',
-                'vehicle_model' => 'Golf',
-                'license_plate' => 'AB-123-CD',
-                'description' => 'Front bumper scratched in the supermarket parking lot.',
-                'status' => ReportStatus::Submitted,
-            ]);
-
-            DamageReport::factory()->create([
-                'vehicle_make' => 'Toyota',
-                'vehicle_model' => 'Yaris',
-                'license_plate' => 'GH-456-IJ',
-                'description' => 'Hailstorm damage on the roof and hood.',
-                'status' => ReportStatus::Approved,
-            ]);
-
-            DamageReport::factory()->create([
-                'vehicle_make' => 'BMW',
-                'vehicle_model' => '3 Series',
-                'license_plate' => 'KL-789-MN',
-                'description' => 'Side mirror knocked off in a narrow street.',
-                'status' => ReportStatus::Draft,
-            ]);
-        }
     }
 }

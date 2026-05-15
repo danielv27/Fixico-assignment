@@ -1,27 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\FeatureFlagController;
-use App\Http\Controllers\Api\BulkDeleteReportsController;
-use App\Http\Controllers\Api\DamageReportController;
 use App\Http\Controllers\Api\FeatureFlagEvaluationController;
-use App\Http\Controllers\Api\ReportPhotosController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => response()->json(['name' => 'Fixico API', 'status' => 'ok']));
 
-// Public client-facing feature flag evaluation
 Route::post('feature_flags/evaluate', [FeatureFlagEvaluationController::class, 'evaluate']);
-
-// Damage report CRUD
-Route::get('reports', [DamageReportController::class, 'index']);
-Route::post('reports', [DamageReportController::class, 'store']);
-Route::get('reports/{report}', [DamageReportController::class, 'show']);
-Route::patch('reports/{report}', [DamageReportController::class, 'update']);
-
-Route::delete('reports/bulk', BulkDeleteReportsController::class)
-    ->middleware('feature_flag:reports.bulk_actions');
-Route::post('reports/{report}/photos', [ReportPhotosController::class, 'store'])
-    ->middleware('feature_flag:reports.photo_attachments');
 
 Route::prefix('admin')->group(function (): void {
     Route::get('feature_flags', [FeatureFlagController::class, 'index']);

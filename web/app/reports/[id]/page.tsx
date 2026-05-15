@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ReportFormView } from "@/components/ReportFormView";
 import { PhotoAttachments } from "@/components/PhotoAttachments";
 import { updateReportAction } from "@/app/reports/actions";
-import { getReport } from "@/lib/api/reports";
+import { getReport } from "@/lib/reports/repository";
 
 const STATUS_LABELS = { draft: "Draft", submitted: "Submitted", approved: "Approved" } as const;
 const STATUS_COLORS = {

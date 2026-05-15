@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, type ReactNode } from "react";
-import type { DamageReport, ReportStatus } from "@/lib/api/reports";
+import type { DamageReport, ReportStatus } from "@/lib/reports/repository";
 import type { FormState } from "@/app/reports/actions";
 
 type Props = {

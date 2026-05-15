@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ReportList } from "@/components/ReportList";
 import { BulkActionsToolbar } from "@/components/BulkActionsToolbar";
-import { listReports } from "@/lib/api/reports";
+import { listReports } from "@/lib/reports/repository";
 
 export default function Home() {
   const reports = listReports();
