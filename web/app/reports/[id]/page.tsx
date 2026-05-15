@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ReportForm } from "@/components/ReportForm";
+import { ReportFormView } from "@/components/ReportFormView";
 import { PhotoAttachments } from "@/components/PhotoAttachments";
 import { updateReportAction } from "@/app/reports/actions";
 import { getReport } from "@/lib/api/reports";
@@ -79,9 +79,9 @@ export default async function ReportDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <ReportForm action={action} initial={report} submitLabel="Save changes">
+      <ReportFormView action={action} initial={report} submitLabel="Save changes">
         <PhotoAttachments reportId={reportId} />
-      </ReportForm>
+      </ReportFormView>
     </main>
   );
 }

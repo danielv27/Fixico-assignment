@@ -12,8 +12,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Feature flags
-
         FeatureFlag::query()->updateOrCreate(
             ['name' => 'demo.banner'],
             [
@@ -35,9 +33,9 @@ class DatabaseSeeder extends Seeder
         );
 
         FeatureFlag::query()->updateOrCreate(
-            ['name' => 'report.new_form_layout'],
+            ['name' => 'form.description_first'],
             [
-                'description' => 'Rolls out a redesigned new-report page to 50 % of NL users.',
+                'description' => 'Reorders the report form to show the damage description field first. Rolled out to 50 % of NL users.',
                 'enabled' => true,
                 'attribute_rules' => [['attribute' => 'country', 'values' => ['NL']]],
                 'rollout_percentage' => 50,

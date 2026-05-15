@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ReportForm } from "@/components/ReportForm";
-import { NewReportBanner } from "@/components/NewReportBanner";
+import { ReportFormView } from "@/components/ReportFormView";
 import { createReportAction } from "@/app/reports/actions";
 
 export const metadata: Metadata = {
@@ -25,11 +24,7 @@ export default function NewReportPage() {
         <p className="mt-0.5 text-sm text-zinc-500">Fill in the details of the damage for assessment.</p>
       </div>
 
-      <div className="mb-5">
-        <NewReportBanner />
-      </div>
-
-      <ReportForm action={createReportAction} submitLabel="Submit report" />
+      <ReportFormView action={createReportAction} submitLabel="Submit report" />
     </main>
   );
 }

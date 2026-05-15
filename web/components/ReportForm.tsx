@@ -8,6 +8,7 @@ type Props = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   initial?: DamageReport;
   submitLabel: string;
+  descriptionFirst?: boolean;
   children?: ReactNode;
 };
 
@@ -17,70 +18,70 @@ const STATUS_OPTIONS: { value: ReportStatus; label: string; description: string 
   { value: "approved", label: "Approved", description: "Assessment approved" },
 ];
 
-export function ReportForm({ action, initial, submitLabel, children }: Props) {
+export function ReportForm({ action, initial, submitLabel, descriptionFirst = false, children }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
+
+  const vehicleFieldset = (
+    <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <legend className="mb-4 text-sm font-semibold text-zinc-800">Vehicle</legend>
+      <div className="grid grid-cols-2 gap-4">
+        <Field
+          name="vehicle_make"
+          label="Make"
+          placeholder="Volkswagen"
+          defaultValue={initial?.vehicle_make}
+          error={state.errors?.vehicle_make?.[0]}
+        />
+        <Field
+          name="vehicle_model"
+          label="Model"
+          placeholder="Golf"
+          defaultValue={initial?.vehicle_model}
+          error={state.errors?.vehicle_model?.[0]}
+        />
+      </div>
+      <div className="mt-4">
+        <Field
+          name="license_plate"
+          label="License plate"
+          placeholder="AB-123-CD"
+          defaultValue={initial?.license_plate}
+          error={state.errors?.license_plate?.[0]}
+          mono
+        />
+      </div>
+    </fieldset>
+  );
+
+  const damageFieldset = (
+    <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <legend className="mb-4 text-sm font-semibold text-zinc-800">Damage</legend>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="description" className="text-sm font-medium text-zinc-700">
+          Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={descriptionFirst ? 5 : 3}
+          defaultValue={initial?.description}
+          placeholder="Describe the damage — location, severity, circumstances…"
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+        />
+        {state.errors?.description?.[0] && (
+          <p className="text-xs text-red-600">{state.errors.description[0]}</p>
+        )}
+      </div>
+    </fieldset>
+  );
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
-      <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <legend className="mb-4 text-sm font-semibold text-zinc-800">
-          Vehicle
-        </legend>
-        <div className="grid grid-cols-2 gap-4">
-          <Field
-            name="vehicle_make"
-            label="Make"
-            placeholder="Volkswagen"
-            defaultValue={initial?.vehicle_make}
-            error={state.errors?.vehicle_make?.[0]}
-          />
-          <Field
-            name="vehicle_model"
-            label="Model"
-            placeholder="Golf"
-            defaultValue={initial?.vehicle_model}
-            error={state.errors?.vehicle_model?.[0]}
-          />
-        </div>
-        <div className="mt-4">
-          <Field
-            name="license_plate"
-            label="License plate"
-            placeholder="AB-123-CD"
-            defaultValue={initial?.license_plate}
-            error={state.errors?.license_plate?.[0]}
-            mono
-          />
-        </div>
-      </fieldset>
-
-      <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <legend className="mb-4 text-sm font-semibold text-zinc-800">
-          Damage
-        </legend>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="description" className="text-sm font-medium text-zinc-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={3}
-            defaultValue={initial?.description}
-            placeholder="Describe the damage — location, severity, circumstances…"
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
-          {state.errors?.description?.[0] && (
-            <p className="text-xs text-red-600">{state.errors.description[0]}</p>
-          )}
-        </div>
-      </fieldset>
+      {descriptionFirst ? <>{damageFieldset}{vehicleFieldset}</> : <>{vehicleFieldset}{damageFieldset}</>}
 
       {initial && (
         <fieldset className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <legend className="mb-4 text-sm font-semibold text-zinc-800">
-            Status
-          </legend>
+          <legend className="mb-4 text-sm font-semibold text-zinc-800">Status</legend>
           <div className="grid grid-cols-3 gap-2">
             {STATUS_OPTIONS.map((opt) => (
               <label
