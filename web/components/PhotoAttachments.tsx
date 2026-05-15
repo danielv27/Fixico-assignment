@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useFlag } from "@/lib/flags/context";
+import { savePhotosAction } from "@/app/reports/actions";
 
 type Props = { reportId: number };
 
@@ -9,7 +10,7 @@ export function PhotoAttachments({ reportId }: Props) {
   const enabled = useFlag("reports.photo_attachments");
   const [urls, setUrls] = useState<string[]>([]);
   const [input, setInput] = useState("");
-  const [message, setMessage] = useState<{ type: "ok" | "stale" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -29,25 +30,10 @@ export function PhotoAttachments({ reportId }: Props) {
     setMessage(null);
     startTransition(async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reports/${reportId}/photos`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
-            body: JSON.stringify({ urls }),
-          },
-        );
-        if (res.status === 410) {
-          setMessage({ type: "stale", text: "Photo attachments are no longer available. Refresh the page." });
-          return;
-        }
-        if (!res.ok) {
-          setMessage({ type: "error", text: `Save failed (${res.status}).` });
-          return;
-        }
+        await savePhotosAction(reportId, urls);
         setMessage({ type: "ok", text: "Photos saved." });
       } catch {
-        setMessage({ type: "error", text: "Could not reach the server." });
+        setMessage({ type: "error", text: "Could not save photos." });
       }
     });
   };

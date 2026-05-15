@@ -4,7 +4,7 @@
 # Day to day:    make up | make down
 # Reset:         make fresh
 
-.PHONY: help up down restart migrate seed bootstrap fresh test logs flush-flags
+.PHONY: help up down restart migrate seed web-seed web-db-reset bootstrap fresh test logs flush-flags
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -24,12 +24,19 @@ migrate: ## Run pending migrations
 seed: ## Run database seeders
 	docker compose exec api php artisan db:seed
 
-bootstrap: up migrate seed ## First-time setup: start, migrate, seed
+web-seed: ## Seed the Next.js SQLite database (skipped if reports already exist)
+	docker compose exec web node scripts/seed.mjs
+
+web-db-reset: ## Wipe and re-seed the Next.js SQLite database
+	docker compose exec web rm -f reports.db
+	$(MAKE) web-seed
+
+bootstrap: up migrate seed web-seed ## First-time setup: start, migrate, seed
 
 fresh: ## Wipe volumes and start clean (rebuilds images)
 	docker compose down -v
 	$(MAKE) up
-	$(MAKE) migrate seed
+	$(MAKE) migrate seed web-seed
 
 test: ## Run the API test suite
 	docker compose exec api php artisan test

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
+  bulkDeleteReports,
   createReport,
   ReportValidationError,
   updateReport,
@@ -63,4 +64,23 @@ export async function updateReportAction(
     }
     throw error;
   }
+}
+
+export async function bulkDeleteAction(
+  ids: number[],
+): Promise<{ deleted: number }> {
+  const deleted = await bulkDeleteReports(ids);
+  revalidatePath("/");
+  return { deleted };
+}
+
+export async function savePhotosAction(
+  reportId: number,
+  urls: string[],
+): Promise<void> {
+  const db = (await import("@/lib/db")).default;
+  db.prepare(
+    "UPDATE damage_reports SET photos = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?",
+  ).run(JSON.stringify(urls), reportId);
+  revalidatePath(`/reports/${reportId}`);
 }
