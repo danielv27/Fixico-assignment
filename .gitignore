@@ -35,7 +35,6 @@ _ide_helper.php
 **/*.tsbuildinfo
 
 # Laravel runtime caches and storage (recreated by Docker build / Laravel at runtime)
-/api/bootstrap/cache/
 /api/storage/
 /api/public/build
 /api/public/hot
