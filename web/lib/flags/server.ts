@@ -2,13 +2,13 @@ import "server-only";
 
 import type { EvaluateRequest, EvaluateResponse, FlagDecisions } from "./types";
 
-const apiBaseUrl = process.env.INTERNAL_API_BASE_URL ?? "http://localhost:8000";
+const apiBaseUrl = process.env.API_URL ?? "http://localhost:8000";
 
 /**
  * Server-side flag evaluation.
  *
  * Called from RSC pages/layouts, which run inside the web container and reach
- * the API over the internal docker network via INTERNAL_API_BASE_URL.
+ * the API over the internal docker network via API_URL.
  *
  * Failures degrade to "no flags enabled" rather than crashing the page. The
  * tradeoff: a broken flag service makes everything look turned off, which is
