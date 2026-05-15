@@ -125,15 +125,12 @@
 
                             {{-- Status (reactive) --}}
                             <td class="px-5 py-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-                                          :class="statusFor(flag).cls">
-                                        <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" :class="statusFor(flag).dot"></span>
-                                        <span x-text="statusFor(flag).label"></span>
-                                    </span>
-                                    <span x-show="statusFor(flag).date" x-text="statusFor(flag).date"
-                                          class="text-xs text-zinc-400 whitespace-nowrap"></span>
-                                </div>
+                                <span class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset cursor-default"
+                                      :class="statusFor(flag).cls"
+                                      :title="statusFor(flag).date ?? ''">
+                                    <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" :class="statusFor(flag).dot"></span>
+                                    <span x-text="statusFor(flag).label"></span>
+                                </span>
                             </td>
 
                             {{-- Toggle --}}
