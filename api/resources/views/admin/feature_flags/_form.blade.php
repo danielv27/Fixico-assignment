@@ -24,6 +24,12 @@
                     </div>
                     <span class="text-sm font-medium text-zinc-700" x-text="on ? 'Enabled' : 'Disabled'"></span>
                 </button>
+
+                @if ($isExpired ?? false)
+                    <p class="mt-2 text-xs text-amber-600">
+                        This flag is expired — the enabled state has no effect until you extend the expiry date.
+                    </p>
+                @endif
             </div>
         </div>
     </div>

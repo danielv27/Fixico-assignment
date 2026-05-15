@@ -33,6 +33,21 @@
         to stay associated with the update form even though it lives outside it.
     --}}
 
+    @php $isExpired = $flag->ends_at !== null && now()->isAfter($flag->ends_at); @endphp
+
+    @if ($isExpired)
+        <div class="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3.5">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="text-sm text-amber-800">
+                <span class="font-semibold">This flag expired {{ $flag->ends_at->diffForHumans() }}.</span>
+                It is no longer served to clients regardless of the enabled toggle.
+                To reactivate it, extend the <span class="font-medium">Expires at</span> date below.
+            </div>
+        </div>
+    @endif
+
     <form id="update-form" method="POST" action="{{ route('admin.feature_flags.update', $flag) }}">
         @csrf
         @method('PATCH')
@@ -45,6 +60,7 @@
             'description' => old('description', $flag->description),
             'enabled'     => old('enabled', $flag->enabled),
             'flagName'    => $flag->name,
+            'isExpired'   => $isExpired,
         ])
     </form>
 
