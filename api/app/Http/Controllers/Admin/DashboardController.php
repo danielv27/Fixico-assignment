@@ -18,16 +18,6 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'flags' => $flags,
             'stats' => $this->stats($flags),
-            'limitedRollouts' => $flags
-                ->filter(fn (FeatureFlag $flag): bool => $flag->enabled && $flag->rollout_percentage !== null)
-                ->sortBy('rollout_percentage')
-                ->values(),
-            'reviewFlags' => $flags
-                ->filter(fn (FeatureFlag $flag): bool => ! $flag->enabled
-                    || ($flag->starts_at !== null && now()->isBefore($flag->starts_at))
-                    || ($flag->ends_at !== null && now()->isAfter($flag->ends_at)))
-                ->take(5)
-                ->values(),
         ]);
     }
 

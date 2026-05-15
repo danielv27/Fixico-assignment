@@ -14,10 +14,12 @@
             <h1 class="mt-1 text-2xl font-bold tracking-tight text-zinc-950">Feature flag operations</h1>
             <p class="mt-1 text-sm text-zinc-500">Rollout state, targeting, schedules, and change activity.</p>
         </div>
-        <div class="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm">
+        <div class="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm">
             <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
             <span class="font-semibold tabular-nums text-zinc-900">{{ $stats['active'] }}</span>
-            <span class="text-zinc-500">active of {{ $stats['total'] }} flags</span>
+            <span class="text-zinc-500">of</span>
+            <span class="font-semibold tabular-nums text-zinc-900">{{ $stats['total'] }}</span>
+            <span class="text-zinc-500">flags active</span>
         </div>
     </div>
 
@@ -40,74 +42,6 @@
             </div>
         @endforeach
     </section>
-
-    <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section class="rounded-lg border border-zinc-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
-                <div>
-                    <h2 class="text-sm font-semibold text-zinc-950">Rollout exposure</h2>
-                    <p class="mt-0.5 text-xs text-zinc-500">Percentage-gated flags by matched audience exposure.</p>
-                </div>
-                <span class="rounded-md bg-zinc-50 px-2 py-1 text-xs font-semibold tabular-nums text-zinc-500 ring-1 ring-inset ring-zinc-200">
-                    {{ $limitedRollouts->count() }} limited
-                </span>
-            </div>
-
-            @if ($limitedRollouts->isEmpty())
-                <div class="px-5 py-6 text-sm text-zinc-400">No percentage gates are configured.</div>
-            @else
-                <div class="grid divide-y divide-zinc-100 md:grid-cols-2 md:divide-x md:divide-y-0">
-                    @foreach ($limitedRollouts as $flag)
-                        <a href="{{ route('admin.feature_flags.edit', $flag) }}" class="block px-5 py-4 transition-colors hover:bg-zinc-50">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="min-w-0">
-                                    <p class="truncate font-mono text-sm font-semibold text-zinc-950">{{ $flag->name }}</p>
-                                    @if ($flag->description)
-                                        <p class="mt-0.5 truncate text-xs text-zinc-400">{{ $flag->description }}</p>
-                                    @endif
-                                </div>
-                                <span class="text-sm font-bold tabular-nums text-zinc-800">{{ $flag->rollout_percentage }}%</span>
-                            </div>
-                            <div class="mt-3 h-2 overflow-hidden rounded-full bg-zinc-200">
-                                <div class="h-full rounded-full bg-emerald-500" style="width: {{ $flag->rollout_percentage }}%"></div>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-        </section>
-
-        <section class="rounded-lg border border-zinc-200 bg-white shadow-sm">
-            <div class="border-b border-zinc-100 px-5 py-4">
-                <h2 class="text-sm font-semibold text-zinc-950">Review queue</h2>
-                <p class="mt-0.5 text-xs text-zinc-500">Flags that are off, pending, or past their rollout window.</p>
-            </div>
-
-            @if ($reviewFlags->isEmpty())
-                <div class="px-5 py-6 text-sm text-zinc-400">No flags need review.</div>
-            @else
-                <div class="divide-y divide-zinc-100">
-                    @foreach ($reviewFlags as $flag)
-                        <a href="{{ route('admin.feature_flags.edit', $flag) }}" class="flex items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-zinc-50">
-                            <div class="min-w-0">
-                                <p class="truncate font-mono text-xs font-semibold text-zinc-950">{{ $flag->name }}</p>
-                                <p class="mt-1 text-xs text-zinc-400">
-                                    @if (! $flag->enabled)
-                                        Disabled
-                                    @elseif ($flag->starts_at && $now->isBefore($flag->starts_at))
-                                        Starts {{ $flag->starts_at->diffForHumans() }}
-                                    @else
-                                        Expired {{ $flag->ends_at?->diffForHumans() }}
-                                    @endif
-                                </p>
-                            </div>
-                            <span class="rounded-md bg-zinc-50 px-2 py-0.5 text-xs font-semibold text-zinc-500 ring-1 ring-inset ring-zinc-200">Review</span>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-        </section>
-    </div>
 
     <section class="mt-4 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
         <div class="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
